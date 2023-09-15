@@ -1,0 +1,5 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Other Addons
+addons/resources_spreadsheet_view

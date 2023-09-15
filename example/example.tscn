@@ -1,0 +1,132 @@
+[gd_scene load_steps=7 format=3 uid="uid://4tmqw8w2u8o5"]
+
+[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
+[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
+[ext_resource type="Resource" uid="uid://bauso3p8ba010" path="res://example/skills/small_hp.tres" id="2_xtlsu"]
+[ext_resource type="Resource" uid="uid://momqsxlp1gfs" path="res://example/skills/small_elemental.tres" id="4_ytcj4"]
+[ext_resource type="Resource" uid="uid://c31230cm8np7i" path="res://example/skills/small_acc.tres" id="5_fevd2"]
+[ext_resource type="Resource" uid="uid://b50a23pxlslin" path="res://example/skills/small_evasion.tres" id="6_jp1vb"]
+
+[node name="Map" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_fafx5")
+
+[node name="Path" type="Node2D" parent="."]
+script = ExtResource("2_oyim1")
+start = Vector2(73.1208, 562.34)
+end = Vector2(315.262, 158.505)
+handle_1 = Vector2(-40, 58)
+handle_2 = Vector2(245.48, 9)
+skip_first = true
+skill_count = 8
+skill_0/data = ExtResource("4_ytcj4")
+skill_0/uid = null
+skill_1/data = ExtResource("4_ytcj4")
+skill_1/uid = null
+skill_2/data = ExtResource("4_ytcj4")
+skill_2/uid = null
+skill_3/data = ExtResource("4_ytcj4")
+skill_3/uid = null
+skill_4/data = ExtResource("4_ytcj4")
+skill_4/uid = null
+skill_5/data = ExtResource("4_ytcj4")
+skill_5/uid = null
+skill_6/data = ExtResource("4_ytcj4")
+skill_6/uid = null
+skill_7/data = ExtResource("4_ytcj4")
+skill_7/uid = null
+
+[node name="Path2" type="Node2D" parent="."]
+script = ExtResource("2_oyim1")
+start = Vector2(315.262, 158.505)
+end = Vector2(662.83, 343.321)
+handle_1 = Vector2(489, 251)
+handle_2 = Vector2(179.943, 196.825)
+mode = 1
+skill_count = 9
+skill_0/data = ExtResource("2_xtlsu")
+skill_0/uid = null
+skill_1/data = ExtResource("2_xtlsu")
+skill_1/uid = null
+skill_2/data = ExtResource("2_xtlsu")
+skill_2/uid = null
+skill_3/data = ExtResource("2_xtlsu")
+skill_3/uid = null
+skill_4/data = ExtResource("2_xtlsu")
+skill_4/uid = null
+skill_5/data = ExtResource("2_xtlsu")
+skill_5/uid = null
+skill_6/data = ExtResource("2_xtlsu")
+skill_6/uid = null
+skill_7/data = ExtResource("2_xtlsu")
+skill_7/uid = null
+skill_8/data = ExtResource("2_xtlsu")
+skill_8/uid = null
+
+[node name="Path3" type="Node2D" parent="."]
+script = ExtResource("2_oyim1")
+start = Vector2(662.83, 343.321)
+end = Vector2(1093.93, 771.946)
+handle_1 = Vector2(881, 555)
+handle_2 = Vector2(181.4, 303.984)
+mode = 1
+skill_count = 12
+skill_0/data = ExtResource("5_fevd2")
+skill_0/uid = null
+skill_1/data = ExtResource("5_fevd2")
+skill_1/uid = null
+skill_2/data = ExtResource("5_fevd2")
+skill_2/uid = null
+skill_3/data = ExtResource("5_fevd2")
+skill_3/uid = null
+skill_4/data = ExtResource("5_fevd2")
+skill_4/uid = null
+skill_5/data = ExtResource("5_fevd2")
+skill_5/uid = null
+skill_6/data = ExtResource("5_fevd2")
+skill_6/uid = null
+skill_7/data = ExtResource("5_fevd2")
+skill_7/uid = null
+skill_8/data = ExtResource("5_fevd2")
+skill_8/uid = null
+skill_9/data = ExtResource("5_fevd2")
+skill_9/uid = null
+skill_10/data = ExtResource("5_fevd2")
+skill_10/uid = null
+skill_11/data = ExtResource("5_fevd2")
+skill_11/uid = null
+
+[node name="Path4" type="Node2D" parent="."]
+script = ExtResource("2_oyim1")
+start = Vector2(1093.93, 771.946)
+end = Vector2(1222.91, 160.784)
+handle_1 = Vector2(1387.47, 478.622)
+handle_2 = Vector2(938.487, 424.744)
+mode = 2
+skill_count = 9
+skill_0/data = ExtResource("6_jp1vb")
+skill_0/uid = null
+skill_1/data = ExtResource("6_jp1vb")
+skill_1/uid = null
+skill_2/data = ExtResource("6_jp1vb")
+skill_2/uid = null
+skill_3/data = ExtResource("6_jp1vb")
+skill_3/uid = null
+skill_4/data = ExtResource("6_jp1vb")
+skill_4/uid = null
+skill_5/data = ExtResource("6_jp1vb")
+skill_5/uid = null
+skill_6/data = ExtResource("6_jp1vb")
+skill_6/uid = null
+skill_7/data = ExtResource("6_jp1vb")
+skill_7/uid = null
+skill_8/data = ExtResource("6_jp1vb")
+skill_8/uid = null
+
+[node name="Ring" type="Node2D" parent="."]
+position = Vector2(489, 251)
+
+[node name="Ring2" type="Node2D" parent="."]
+position = Vector2(881, 555)

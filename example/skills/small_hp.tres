@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=4 format=3 uid="uid://bauso3p8ba010"]
+
+[ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_y4yws"]
+[ext_resource type="Texture2D" uid="uid://cji2hjb30pjt0" path="res://example/skill_icons1.png" id="2_a0sh5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txrhh"]
+atlas = ExtResource("2_a0sh5")
+region = Rect2(0, 0, 24, 24)
+
+[resource]
+script = ExtResource("1_y4yws")
+id = &"small_hp"
+texture = SubResource("AtlasTexture_txrhh")
+color = Color(1, 0.356863, 0.690196, 1)
+name = "Lesser Life"
+desc = "+20 Health Points"
+size_tier = 0
+unlock_cost = 1
+tags = Array[StringName]([&"small", &"hp", &"physical"])

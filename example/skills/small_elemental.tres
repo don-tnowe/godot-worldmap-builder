@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=4 format=3 uid="uid://momqsxlp1gfs"]
+
+[ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_q3vei"]
+[ext_resource type="Texture2D" uid="uid://cji2hjb30pjt0" path="res://example/skill_icons1.png" id="2_yn26q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_txrhh"]
+atlas = ExtResource("2_yn26q")
+region = Rect2(192, 0, 24, 24)
+
+[resource]
+script = ExtResource("1_q3vei")
+id = &"small_elemental"
+texture = SubResource("AtlasTexture_txrhh")
+color = Color(0.729412, 0.227451, 1, 1)
+name = "Lesser Elemental Damage"
+desc = "+4% All Elemental Damage"
+size_tier = 0
+unlock_cost = 1
+tags = Array[StringName]([&"small", &"elemental", &"damage"])
