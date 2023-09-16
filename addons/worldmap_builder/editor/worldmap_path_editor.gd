@@ -27,7 +27,19 @@ func _handles(object : Object):
 
 func _forward_canvas_draw_over_viewport(overlay : Control):
 	if edited_object == null: return
-	for x in _get_marker_positions():
+	var markers := _get_marker_positions()
+	if edited_object is WorldmapPath:
+		match edited_object.mode:
+			0:
+				overlay.draw_line(markers[0], markers[1], draw_line_color, draw_line_size)
+			1:
+				overlay.draw_line(markers[0], markers[2], draw_line_color, draw_line_size)
+				overlay.draw_line(markers[1], markers[2], draw_line_color, draw_line_size)
+			2:
+				overlay.draw_line(markers[0], markers[2], draw_line_color, draw_line_size)
+				overlay.draw_line(markers[1], markers[3], draw_line_color, draw_line_size)
+
+	for x in markers:
 		overlay.draw_texture(draw_marker, x - draw_marker.get_size() * 0.5)
 
 
@@ -40,6 +52,7 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			var was_dragging := dragging
 			dragging = -1
 			if event.pressed:
 				var markers := _get_marker_positions()
@@ -47,6 +60,12 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
 						dragging = i
 						return true
+
+			elif was_dragging != -1:
+				plugin.get_undo_redo().create_action("Finish Moving Handle")
+				plugin.get_undo_redo().add_undo_property(edited_object, &"position", edited_object.position)
+				plugin.get_undo_redo().add_do_property(edited_object, &"position", edited_object.position)
+				plugin.get_undo_redo().commit_action(true)
 
 			return false
 
@@ -75,7 +94,7 @@ func _handle_drag(event : InputEvent) -> bool:
 		snap_distance_squared *= snap_distance_squared
 		target_value = _get_snap(snap_targets, target_value, snap_distance_squared)
 
-	undoredo.create_action("Move Handle", UndoRedo.MERGE_ALL)
+	undoredo.create_action("Move Handle", UndoRedo.MERGE_ENDS)
 	undoredo.add_undo_property(edited_object, property, old_value)
 	undoredo.add_do_property(edited_object, property, target_value)
 	undoredo.commit_action(true)
@@ -85,14 +104,14 @@ func _handle_drag(event : InputEvent) -> bool:
 
 func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : float) -> Vector2:
 	for x in snap_targets:
-		if x == edited_object:
-			var pos_new := _arc_snap_end(pos, snap_distance_squared)
-			if pos_new != pos:
-				return pos_new
-
-			continue
-
 		if x is WorldmapPath:
+			if x == edited_object:
+				var pos_new := _arc_snap_end(pos, snap_distance_squared)
+				if pos_new != pos:
+					return pos_new
+
+				continue
+
 			if x.start.distance_squared_to(pos) < snap_distance_squared:
 				return x.start
 
@@ -107,22 +126,38 @@ func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : floa
 
 
 func _arc_snap_end(pos : Vector2, snap_distance_squared : float) -> Vector2:
-	if edited_object.mode != WorldmapPath.PathMode.RADIUS:
-		return pos
-
 	var start_point := Vector2()
 	var end_point := Vector2()
 	var center_point : Vector2 = edited_object.handle_1
-	if dragging == 0:
-		start_point = edited_object.end
-		end_point = edited_object.start
+	if edited_object.mode != WorldmapPath.PathMode.BEZIER:
+		if dragging == 0:
+			start_point = edited_object.end
+			end_point = edited_object.start
 
-	elif dragging == 1:
-		start_point = edited_object.start
-		end_point = edited_object.end
+		elif dragging == 1:
+			start_point = edited_object.start
+			end_point = edited_object.end
+
+		else:
+			return pos
 
 	else:
-		return pos
+		if dragging == 2:
+			center_point = edited_object.start
+			start_point = Vector2((edited_object.handle_1 - edited_object.start).length(), 0) + edited_object.start
+			end_point = edited_object.handle_1
+
+		elif dragging == 3:
+			center_point = edited_object.end
+			start_point = Vector2((edited_object.handle_2 - edited_object.end).length(), 0) + edited_object.end
+			end_point = edited_object.handle_2
+
+		else:
+			return pos
+
+	if edited_object.mode == WorldmapPath.PathMode.LINE:
+		center_point = start_point
+		start_point = Vector2((end_point - start_point).length(), 0) + start_point
 
 	var target_value_snapped : Vector2 = (start_point - center_point)
 	var arc_angle : float = (start_point - center_point).angle_to(end_point - center_point)
@@ -146,19 +181,22 @@ func _arc_snap_end(pos : Vector2, snap_distance_squared : float) -> Vector2:
 
 
 func _get_viewport_xform() -> Transform2D:
-	return edited_object.get_viewport().global_canvas_transform.translated(edited_object.position)
+	var xform : Transform2D = edited_object.get_viewport().global_canvas_transform
+	return xform.translated(edited_object.position * xform.get_scale())
 
 
 func _get_marker_positions() -> Array[Vector2]:
 	var result : Array[Vector2] = []
 	var xform : Transform2D = _get_viewport_xform()
-	result.append(xform * edited_object.start)
-	result.append(xform * edited_object.end)
-	if edited_object.mode == WorldmapPath.PathMode.RADIUS:
-		result.append(xform * edited_object.handle_1)
+	if edited_object is WorldmapPath:
+		result.append(xform * edited_object.start)
+		result.append(xform * edited_object.end)
+		if edited_object.mode == WorldmapPath.PathMode.RADIUS:
+			result.append(xform * edited_object.handle_1)
 
-	if edited_object.mode == WorldmapPath.PathMode.BEZIER:
-		result.append(xform * edited_object.handle_1)
-		result.append(xform * edited_object.handle_2)
+		if edited_object.mode == WorldmapPath.PathMode.BEZIER:
+			result.append(xform * edited_object.handle_1)
+			result.append(xform * edited_object.handle_2)
 
 	return result
+ 

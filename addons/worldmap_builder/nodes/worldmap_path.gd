@@ -29,6 +29,9 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 		queue_redraw()
 @export var handle_2 := Vector2(0, 0):
 	set(v):
+		if mode == PathMode.LINE && !_arc_changing:
+			end = start + (Vector2(v.y, 0.0).rotated(deg_to_rad(v.x)))
+
 		if mode == PathMode.RADIUS && !_arc_changing:
 			end = handle_1 + ((start - handle_1).rotated(deg_to_rad(v.x))).normalized() * v.y
 			start = handle_1 + (start - handle_1).normalized() * v.y
@@ -45,9 +48,9 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 	set(v):
 		bidirectional = v
 		queue_redraw()
-@export var skip_first := false:
+@export var skip_last := false:
 	set(v):
-		skip_first = v
+		skip_last = v
 		queue_redraw()
 @export var end_connections : Array[WorldmapPath]:
 	set(v):
@@ -70,7 +73,7 @@ func _enter_tree():
 
 func _draw():
 	var last_pos := Vector2.ZERO
-	var skip_n := 1 if skip_first else 0
+	var skip_n := 1 if skip_last else 0
 	var count := skill_datas.size() + skip_n
 	var angle_diff := (start - handle_1).angle_to(end - handle_1)
 	var is_editor := Engine.is_editor_hint()
@@ -90,12 +93,12 @@ func _draw():
 				cur_pos = start.bezier_interpolate(handle_1, handle_2, end, float(i) / count)
 
 		last_pos = cur_pos
-		if (i == 0 && skip_first) || skill_datas[i - skip_n] == null:
+		if (i == count - 1 && skip_last) || skill_datas[i - 1] == null:
 			continue
 
-		var tex := skill_datas[i - skip_n].texture
+		var tex := skill_datas[i - 1].texture
 		var tex_size := tex.get_size()
-		var node := _node_controls[i - skip_n]
+		var node := _node_controls[i - 1]
 		node.position = cur_pos - tex_size * 0.5
 		node.size = tex_size
 		node.show()
@@ -103,14 +106,21 @@ func _draw():
 
 
 func _update_radius_arc():
-	if mode != PathMode.RADIUS || _arc_changing:
-		return
-
+	if _arc_changing: return
 	_arc_changing = true
-	handle_2 = Vector2(
-		rad_to_deg((start - handle_1).angle_to(end - handle_1)),
-		(start - handle_1).length()
-	)
+
+	if mode == PathMode.LINE:
+		handle_2 = Vector2(
+			rad_to_deg((end - start).angle()),
+			(end - start).length()
+		)
+
+	elif mode == PathMode.RADIUS:
+		handle_2 = Vector2(
+			rad_to_deg((start - handle_1).angle_to(end - handle_1)),
+			(start - handle_1).length()
+		)
+
 	_arc_changing = false
 
 
