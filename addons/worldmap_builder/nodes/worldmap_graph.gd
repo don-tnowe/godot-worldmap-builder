@@ -40,7 +40,8 @@ var connection_weights : Array[Vector2]
 var _node_controls : Array[Control] = []
 var _arc_changing := false
 
-
+## Adds a node at [code]pos[/code] and connects it to [code]parent_node[/code]. [br]
+## [member node_datas] is copied from the parent.
 func add_node(pos : Vector2, parent_node : int):
 	node_datas.append(node_datas[parent_node])
 	node_positions.append(pos)
@@ -48,6 +49,23 @@ func add_node(pos : Vector2, parent_node : int):
 	connection_weights.append(Vector2.ONE)
 	connection_mode = connection_mode  # Trigger setter to apply mode
 	_add_new_node_control()
+	queue_redraw()
+
+## Removes a node, along with all of its connections.[br]
+func remove_node(index : int):
+	node_datas.remove_at(index)
+	node_positions.remove_at(index)
+	set(&"node_count", node_datas.size())
+
+	var i := 0
+	while i < connection_nodes.size():
+		if connection_nodes[i].x == index || connection_nodes[i].y == index:
+			connection_nodes.remove_at(i)
+			connection_weights.remove_at(i)
+
+		i += 1
+
+	set(&"connection_count", connection_nodes.size())
 	queue_redraw()
 
 

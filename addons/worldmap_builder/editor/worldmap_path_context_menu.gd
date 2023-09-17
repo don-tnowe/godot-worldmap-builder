@@ -2,6 +2,21 @@ extends RefCounted
 
 
 static func open_context_menu_for_marker(obj : Object, screen_position : Vector2, marker_index : int, plugin : EditorPlugin) -> Popup:
+	if obj is WorldmapGraph:
+		var menu_box := [null]  # Keep it under reference so callbacks can be told to reference it before it's created
+		menu_box[0] = open_context_menu(screen_position,
+			["Delete"],
+			[],
+			[
+				(func():
+					obj.remove_node(marker_index)
+					menu_box[0].hide()
+					),
+			],
+			plugin,
+		)
+		return menu_box[0]
+
 	if obj is WorldmapPath:
 		var context_props : Array[StringName] = []
 		var context_values : Array = []
