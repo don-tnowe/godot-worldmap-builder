@@ -21,6 +21,12 @@ var added_scripts := [
 		"Path2D",
 	],
 	[
+		"WorldmapGraph",
+		preload(scripts_dir + "nodes/worldmap_graph.gd"),
+		# icons_dir + "worldmap_graph.png",
+		"MeshInstance2D",
+	],
+	[
 		"WorldmapSkillData",
 		preload(scripts_dir + "resource_types/worldmap_node_data.gd"),
 		# icons_dir + "worldmap_node_data.png",

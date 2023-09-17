@@ -7,6 +7,7 @@ var plugin : EditorPlugin
 var draw_line_color := Color.WHITE
 var draw_line_size := 2.0
 var draw_marker : Texture2D
+var draw_marker_add : Texture2D
 var snap_angle := 5.0
 
 var edited_object : Object:
@@ -14,6 +15,7 @@ var edited_object : Object:
 		edited_object = v
 		plugin.update_overlays()
 
+var last_dragging := -1
 var dragging := -1
 var context_menu : Popup
 
@@ -21,16 +23,20 @@ var context_menu : Popup
 func _init(plugin : EditorPlugin):
 	var ctrl := plugin.get_editor_interface().get_base_control()
 	draw_marker = ctrl.get_theme_icon(&"EditorPathSharpHandle", &"EditorIcons")
+	draw_marker_add = ctrl.get_theme_icon(&"EditorHandleAdd", &"EditorIcons")
 	self.plugin = plugin
 
 
 func _handles(object : Object):
-	return object is WorldmapPath
+	return object is WorldmapPath || object is WorldmapGraph
 
 
 func _forward_canvas_draw_over_viewport(overlay : Control):
 	if edited_object == null: return
 	var markers := _get_marker_positions()
+	if markers.size() <= last_dragging:
+		last_dragging = markers.size() - 1
+
 	if edited_object is WorldmapPath:
 		match edited_object.mode:
 			0:
@@ -41,6 +47,46 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 			2:
 				overlay.draw_line(markers[0], markers[2], draw_line_color, draw_line_size)
 				overlay.draw_line(markers[1], markers[3], draw_line_color, draw_line_size)
+
+	if edited_object is WorldmapGraph:
+		var pos_arr : Array = edited_object.node_positions
+		var vp_xform := _get_viewport_xform()
+		var selected_node_pos := markers[last_dragging]
+		var add_node_distance : float = edited_object.connection_min_length
+		if add_node_distance <= 0.0:
+			add_node_distance = 32.0
+
+		var selected_node_radius := vp_xform.get_scale().x * add_node_distance
+		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.05, PI * 0.45, 8, draw_line_color, draw_line_size)
+		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.55, PI * 0.95, 8, draw_line_color, draw_line_size)
+		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.05, PI * 1.45, 8, draw_line_color, draw_line_size)
+		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.55, PI * 1.95, 8, draw_line_color, draw_line_size)
+
+		for i in edited_object.connection_nodes.size():
+			var connection : Vector2i = edited_object.connection_nodes[i]
+			var connection_start : Vector2 = pos_arr[connection.x]
+			var connection_vec : Vector2 = pos_arr[connection.y] - connection_start
+			var connection_weights : Vector2 = edited_object.connection_weights[i]
+			var poly_pt_offset := Vector2(-connection_vec.y, connection_vec.x).normalized() * draw_line_size * 0.5
+
+			var c1 := Color(draw_line_color, connection_weights.x / maxf(connection_weights.x, connection_weights.y))
+			var c2 := Color(draw_line_color, connection_weights.y / maxf(connection_weights.x, connection_weights.y))
+
+			overlay.draw_polygon([
+				vp_xform * (connection_start) + poly_pt_offset * maxf(connection_weights.x, 1.0),
+				vp_xform * (connection_start) - poly_pt_offset * maxf(connection_weights.x, 1.0),
+				vp_xform * (connection_start + connection_vec) - poly_pt_offset * maxf(connection_weights.y, 1.0),
+				vp_xform * (connection_start + connection_vec) + poly_pt_offset * maxf(connection_weights.y, 1.0),
+			], [
+				c1, c1, c2, c2,
+			])
+
+		var add_icon_size := draw_marker_add.get_size()
+		var mouse_pos := overlay.get_local_mouse_position()
+		if _is_within_ring(mouse_pos, selected_node_pos, selected_node_radius, add_icon_size.x):
+			var snapped_angle := snappedf((mouse_pos - selected_node_pos).angle(), deg_to_rad(snap_angle))
+			var snapped_offset := Vector2(selected_node_radius * cos(snapped_angle), selected_node_radius * sin(snapped_angle))
+			overlay.draw_texture(draw_marker_add, selected_node_pos + snapped_offset - add_icon_size * 0.5)
 
 	for x in markers:
 		overlay.draw_texture(draw_marker, x - draw_marker.get_size() * 0.5)
@@ -58,10 +104,14 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 			var was_dragging := dragging
 			dragging = -1
 			if event.pressed:
+				if _handle_non_marker_click(event):
+					return true
+
 				var markers := _get_marker_positions()
 				for i in markers.size():
 					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
 						dragging = i
+						last_dragging = i
 						return true
 
 			elif was_dragging != -1:
@@ -72,13 +122,14 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 
 			return false
 
-		if event.button_index == MOUSE_BUTTON_RIGHT && dragging == -1:
+		if event.button_index == MOUSE_BUTTON_RIGHT:
 			if event.pressed:
 				var markers := _get_marker_positions()
 				for i in markers.size():
 					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
 						var menu_pos : Vector2 = event.global_position + plugin.get_editor_interface().get_base_control().get_screen_position()
 						context_menu = WorldmapEditorContextMenuClass.open_context_menu_for_marker(edited_object, menu_pos, i, plugin)
+						last_dragging = i
 						return true
 
 			return false
@@ -89,16 +140,21 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 	return false
 
 
-func _handle_drag(event : InputEvent) -> bool:
+func _handle_drag(event : InputEventMouseMotion) -> bool:
 	var vp_xform := _get_viewport_xform()
 	var undoredo := plugin.get_undo_redo()
 	var property := &""
-	match dragging:
-		-1: return false
-		0: property = &"start"
-		1: property = &"end"
-		2: property = &"handle_1"
-		3: property = &"handle_2"
+	if edited_object is WorldmapPath:
+		match dragging:
+			-1: return false
+			0: property = &"start"
+			1: property = &"end"
+			2: property = &"handle_1"
+			3: property = &"handle_2"
+
+	if edited_object is WorldmapGraph:
+		if dragging == -1: return false
+		property = "node_%d/position" % dragging
 
 	var old_value := edited_object.get(property)
 	var target_value : Vector2 = vp_xform.affine_inverse() * event.position
@@ -114,6 +170,28 @@ func _handle_drag(event : InputEvent) -> bool:
 	undoredo.commit_action(true)
 
 	return true
+
+
+func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
+	if edited_object is WorldmapGraph:
+		var vp_xform := _get_viewport_xform()
+		var add_node_distance : float = edited_object.connection_min_length
+		if add_node_distance <= 0.0:
+			add_node_distance = 32.0
+
+		var selected_node_radius := vp_xform.get_scale().x * add_node_distance
+		var selected_node_pos : Vector2 = edited_object.node_positions[last_dragging]
+		if _is_within_ring(event.position, vp_xform * selected_node_pos, selected_node_radius, draw_marker_add.get_width()):
+			var snapped_angle := snappedf((event.position - vp_xform * selected_node_pos).angle(), deg_to_rad(snap_angle))
+			var snapped_offset := Vector2(add_node_distance * cos(snapped_angle), add_node_distance * sin(snapped_angle))
+			edited_object.add_node(selected_node_pos + snapped_offset, last_dragging)
+			last_dragging = edited_object.node_datas.size() - 1
+			plugin.update_overlays()
+			return true
+
+		return false
+
+	return false
 
 
 func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : float) -> Vector2:
@@ -194,6 +272,12 @@ func _arc_snap_end(pos : Vector2, snap_distance_squared : float) -> Vector2:
 	return pos
 
 
+func _is_within_ring(pos : Vector2, ring_pos : Vector2, ring_radius : float, ring_thickness : float) -> bool:
+	var l2 := (pos - ring_pos).length_squared()
+	ring_thickness *= 0.5
+	return l2 <= (ring_radius + ring_thickness) * (ring_radius + ring_thickness) && l2 >= (ring_radius - ring_thickness) * (ring_radius - ring_thickness)
+
+
 func _get_viewport_xform() -> Transform2D:
 	var xform : Transform2D = edited_object.get_viewport().global_canvas_transform
 	return xform.translated(edited_object.position * xform.get_scale())
@@ -211,5 +295,9 @@ func _get_marker_positions() -> Array[Vector2]:
 		if edited_object.mode == WorldmapPath.PathMode.BEZIER:
 			result.append(xform * edited_object.handle_1)
 			result.append(xform * edited_object.handle_2)
+
+	if edited_object is WorldmapGraph:
+		for x in edited_object.node_positions:
+			result.append(xform * x)
 
 	return result

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://4tmqw8w2u8o5"]
+[gd_scene load_steps=9 format=3 uid="uid://4tmqw8w2u8o5"]
 
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
@@ -6,6 +6,8 @@
 [ext_resource type="Resource" uid="uid://momqsxlp1gfs" path="res://example/skills/small_elemental.tres" id="4_ytcj4"]
 [ext_resource type="Resource" uid="uid://c31230cm8np7i" path="res://example/skills/small_acc.tres" id="5_fevd2"]
 [ext_resource type="Resource" uid="uid://b50a23pxlslin" path="res://example/skills/small_evasion.tres" id="6_jp1vb"]
+[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
+[ext_resource type="Resource" uid="uid://b1t0k6su5o8v" path="res://example/skills/small_mp.tres" id="8_41shr"]
 
 [node name="Map" type="Control"]
 layout_mode = 3
@@ -82,3 +84,12 @@ node_5/data = ExtResource("4_ytcj4")
 node_6/data = ExtResource("4_ytcj4")
 node_7/data = ExtResource("4_ytcj4")
 node_8/data = ExtResource("4_ytcj4")
+
+[node name="WorldmapGraph" type="Node2D" parent="."]
+script = ExtResource("7_miljq")
+connection_mode = 1
+connection_min_length = 64.0
+node_count = 1
+node_0/data = ExtResource("8_41shr")
+node_0/position = Vector2(472.127, 504.379)
+connection_count = 0
