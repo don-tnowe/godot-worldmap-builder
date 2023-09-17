@@ -15,10 +15,10 @@ script = ExtResource("1_fafx5")
 
 [node name="Path" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
-start = Vector2(60.8853, 521.793)
-end = Vector2(317.319, 155.568)
-handle_1 = Vector2(-40, 58)
-handle_2 = Vector2(-55, 443.492)
+start = Vector2(69.8754, 585.219)
+end = Vector2(318.262, 137.505)
+handle_1 = Vector2(-37, 37)
+handle_2 = Vector2(-52, 422.492)
 skill_count = 8
 skill_0/data = ExtResource("4_ytcj4")
 skill_0/uid = null
@@ -39,10 +39,10 @@ skill_7/uid = null
 
 [node name="Path2" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
-start = Vector2(315.262, 158.505)
-end = Vector2(662.867, 343.252)
-handle_1 = Vector2(489, 251)
-handle_2 = Vector2(179.92, 196.825)
+start = Vector2(318.262, 137.505)
+end = Vector2(680.768, 285.74)
+handle_1 = Vector2(492, 230)
+handle_2 = Vector2(182.92, 175.825)
 mode = 1
 skill_count = 9
 skill_0/data = ExtResource("2_xtlsu")
@@ -66,12 +66,12 @@ skill_8/uid = null
 
 [node name="Path3" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
-start = Vector2(662.83, 343.321)
-end = Vector2(1093.93, 771.946)
-handle_1 = Vector2(881, 555)
-handle_2 = Vector2(-178.6, 303.984)
+start = Vector2(680.768, 285.74)
+end = Vector2(984.077, 572.852)
+handle_1 = Vector2(864.485, 395.425)
+handle_2 = Vector2(-175.6, 282.984)
 mode = 1
-skill_count = 12
+skill_count = 9
 skill_0/data = ExtResource("5_fevd2")
 skill_0/uid = null
 skill_1/data = ExtResource("5_fevd2")
@@ -90,19 +90,13 @@ skill_7/data = ExtResource("5_fevd2")
 skill_7/uid = null
 skill_8/data = ExtResource("5_fevd2")
 skill_8/uid = null
-skill_9/data = ExtResource("5_fevd2")
-skill_9/uid = null
-skill_10/data = ExtResource("5_fevd2")
-skill_10/uid = null
-skill_11/data = ExtResource("5_fevd2")
-skill_11/uid = null
 
 [node name="Path4" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
-start = Vector2(1093.93, 771.946)
-end = Vector2(1248.08, 219.292)
-handle_1 = Vector2(1363.56, 573.559)
-handle_2 = Vector2(950.498, 384.985)
+start = Vector2(984.077, 572.852)
+end = Vector2(1012.48, 129.425)
+handle_1 = Vector2(1147.08, 378.596)
+handle_2 = Vector2(913.485, 334.425)
 mode = 2
 skill_count = 9
 skill_0/data = ExtResource("6_jp1vb")
@@ -123,9 +117,3 @@ skill_7/data = ExtResource("6_jp1vb")
 skill_7/uid = null
 skill_8/data = ExtResource("6_jp1vb")
 skill_8/uid = null
-
-[node name="Ring" type="Node2D" parent="."]
-position = Vector2(489, 251)
-
-[node name="Ring2" type="Node2D" parent="."]
-position = Vector2(881, 555)

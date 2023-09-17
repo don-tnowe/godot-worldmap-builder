@@ -4,7 +4,7 @@ extends Node2D
 
 enum PathMode {
 	LINE = 0,
-	RADIUS,
+	ARC,
 	BEZIER,
 }
 
@@ -53,6 +53,32 @@ var skill_uid : Array[int]
 var _node_controls : Array[Control] = []
 var _arc_changing := false
 
+## Calculate distance between any 2 points, if using a mode that spaces them equally. [br]
+## [b]Note:[/b] undefined behaviour for the [code]PathMode.BEZIER[/code] mode.
+func get_distance_between_points() -> float:
+	var segment_count := skill_datas.size() + (1 if end_with_empty else 0)
+	if mode == PathMode.ARC:
+		var arc_angle := (start - handle_1).angle_to(end - handle_1)
+		var chord_length := ((start - handle_1) - (start - handle_1).rotated(arc_angle / segment_count)).length()
+		return chord_length
+
+	else:
+		return (start - end).length() / segment_count
+
+## Align points so that distance between them equals the specified amount. [br]
+## The [member start] point will always stay in place. [br]
+## [b]Note:[/b] undefined behaviour for the [code]PathMode.BEZIER[/code] mode.
+func set_distance_between_points(value : float):
+	var segment_count := skill_datas.size() + (1 if end_with_empty else 0)
+	if mode == PathMode.ARC:
+		var radius := (start - handle_1).length()
+		var half_sine := value * 0.5 / radius
+		var arc_angle := asin(half_sine) * 2.0 * segment_count
+		end = handle_1 + (start - handle_1).rotated(arc_angle)
+
+	elif mode == PathMode.LINE:
+		end = start + (end - start).normalized() * value * segment_count
+
 
 func _enter_tree():
 	if end.x == INF:
@@ -83,7 +109,7 @@ func _draw():
 			PathMode.LINE:
 				cur_pos = lerp(start, end, float(i) / count_points)
 
-			PathMode.RADIUS:
+			PathMode.ARC:
 				cur_pos = (start - handle_1).rotated(angle_diff * i / count_points) + handle_1
 
 			PathMode.BEZIER:

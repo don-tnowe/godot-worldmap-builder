@@ -1,5 +1,7 @@
 extends RefCounted
 
+const WorldmapEditorContextMenuClass := preload("res://addons/worldmap_builder/editor/worldmap_path_context_menu.gd")
+
 var plugin : EditorPlugin
 
 var draw_line_color := Color.WHITE
@@ -13,6 +15,7 @@ var edited_object : Object:
 		plugin.update_overlays()
 
 var dragging := -1
+var context_menu : Popup
 
 
 func _init(plugin : EditorPlugin):
@@ -66,6 +69,17 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 				plugin.get_undo_redo().add_undo_property(edited_object, &"position", edited_object.position)
 				plugin.get_undo_redo().add_do_property(edited_object, &"position", edited_object.position)
 				plugin.get_undo_redo().commit_action(true)
+
+			return false
+
+		if event.button_index == MOUSE_BUTTON_RIGHT && dragging == -1:
+			if event.pressed:
+				var markers := _get_marker_positions()
+				for i in markers.size():
+					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
+						var menu_pos : Vector2 = event.global_position + plugin.get_editor_interface().get_base_control().get_screen_position()
+						context_menu = WorldmapEditorContextMenuClass.open_context_menu_for_marker(edited_object, menu_pos, i, plugin)
+						return true
 
 			return false
 
@@ -191,7 +205,7 @@ func _get_marker_positions() -> Array[Vector2]:
 	if edited_object is WorldmapPath:
 		result.append(xform * edited_object.start)
 		result.append(xform * edited_object.end)
-		if edited_object.mode == WorldmapPath.PathMode.RADIUS:
+		if edited_object.mode == WorldmapPath.PathMode.ARC:
 			result.append(xform * edited_object.handle_1)
 
 		if edited_object.mode == WorldmapPath.PathMode.BEZIER:
@@ -199,4 +213,3 @@ func _get_marker_positions() -> Array[Vector2]:
 			result.append(xform * edited_object.handle_2)
 
 	return result
- 
