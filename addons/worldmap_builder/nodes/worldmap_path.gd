@@ -15,27 +15,17 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 @export var start := Vector2(INF, INF):
 	set(v):
 		start = v
-		_update_radius_arc()
 		queue_redraw()
 @export var end := Vector2(INF, INF):
 	set(v):
 		end = v
-		_update_radius_arc()
 		queue_redraw()
 @export var handle_1 := Vector2(INF, INF):
 	set(v):
 		handle_1 = v
-		_update_radius_arc()
 		queue_redraw()
 @export var handle_2 := Vector2(0, 0):
 	set(v):
-		if mode == PathMode.LINE && !_arc_changing:
-			end = start + (Vector2(v.y, 0.0).rotated(deg_to_rad(v.x)))
-
-		if mode == PathMode.RADIUS && !_arc_changing:
-			end = handle_1 + ((start - handle_1).rotated(deg_to_rad(v.x))).normalized() * v.y
-			start = handle_1 + (start - handle_1).normalized() * v.y
-
 		handle_2 = v
 		queue_redraw()
 
@@ -48,9 +38,9 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 	set(v):
 		bidirectional = v
 		queue_redraw()
-@export var skip_last := false:
+@export var end_with_empty := false:
 	set(v):
-		skip_last = v
+		end_with_empty = v
 		queue_redraw()
 @export var end_connections : Array[WorldmapPath]:
 	set(v):
@@ -70,30 +60,37 @@ func _enter_tree():
 		handle_1 = start + Vector2(0.0, 0.0)
 		handle_2 = end + Vector2(0.0, 0.0)
 
+	if position != Vector2.ZERO:
+		start += position
+		end += position
+		handle_1 += position
+		if mode != PathMode.BEZIER: handle_2 += position
+		position = Vector2.ZERO
+
 
 func _draw():
 	var last_pos := Vector2.ZERO
-	var skip_n := 1 if skip_last else 0
-	var count := skill_datas.size() + skip_n
+	var count_nodes := skill_datas.size()
+	var count_points := count_nodes + (1 if end_with_empty else 0)
 	var angle_diff := (start - handle_1).angle_to(end - handle_1)
 	var is_editor := Engine.is_editor_hint()
 	for x in _node_controls:
 		x.hide()
 
-	for i in count:
+	for i in count_nodes + 1:
 		var cur_pos := last_pos
 		match mode:
 			PathMode.LINE:
-				cur_pos = lerp(start, end, float(i) / count)
+				cur_pos = lerp(start, end, float(i) / count_points)
 
 			PathMode.RADIUS:
-				cur_pos = (start - handle_1).rotated(angle_diff * i / count) + handle_1
+				cur_pos = (start - handle_1).rotated(angle_diff * i / count_points) + handle_1
 
 			PathMode.BEZIER:
-				cur_pos = start.bezier_interpolate(handle_1, handle_2, end, float(i) / count)
+				cur_pos = start.bezier_interpolate(handle_1, handle_2, end, float(i) / count_points)
 
 		last_pos = cur_pos
-		if (i == count - 1 && skip_last) || skill_datas[i - 1] == null:
+		if i == 0 || skill_datas[i - 1] == null:
 			continue
 
 		var tex := skill_datas[i - 1].texture
@@ -103,25 +100,6 @@ func _draw():
 		node.size = tex_size
 		node.show()
 		draw_texture(tex, cur_pos - tex_size * 0.5)
-
-
-func _update_radius_arc():
-	if _arc_changing: return
-	_arc_changing = true
-
-	if mode == PathMode.LINE:
-		handle_2 = Vector2(
-			rad_to_deg((end - start).angle()),
-			(end - start).length()
-		)
-
-	elif mode == PathMode.RADIUS:
-		handle_2 = Vector2(
-			rad_to_deg((start - handle_1).angle_to(end - handle_1)),
-			(start - handle_1).length()
-		)
-
-	_arc_changing = false
 
 
 func _set(property : StringName, value) -> bool:
