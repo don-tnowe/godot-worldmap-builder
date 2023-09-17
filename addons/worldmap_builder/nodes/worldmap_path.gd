@@ -47,8 +47,7 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 		end_connections = v
 		queue_redraw()
 
-var skill_datas : Array[WorldmapNodeData]
-var skill_uid : Array[int]
+var node_datas : Array[WorldmapNodeData]
 
 var _node_controls : Array[Control] = []
 var _arc_changing := false
@@ -56,7 +55,7 @@ var _arc_changing := false
 ## Calculate distance between any 2 points, if using a mode that spaces them equally. [br]
 ## [b]Note:[/b] undefined behaviour for the [code]PathMode.BEZIER[/code] mode.
 func get_distance_between_points() -> float:
-	var segment_count := skill_datas.size() + (1 if end_with_empty else 0)
+	var segment_count := node_datas.size() + (1 if end_with_empty else 0)
 	if mode == PathMode.ARC:
 		var arc_angle := (start - handle_1).angle_to(end - handle_1)
 		var chord_length := ((start - handle_1) - (start - handle_1).rotated(arc_angle / segment_count)).length()
@@ -69,7 +68,7 @@ func get_distance_between_points() -> float:
 ## The [member start] point will always stay in place. [br]
 ## [b]Note:[/b] undefined behaviour for the [code]PathMode.BEZIER[/code] mode.
 func set_distance_between_points(value : float):
-	var segment_count := skill_datas.size() + (1 if end_with_empty else 0)
+	var segment_count := node_datas.size() + (1 if end_with_empty else 0)
 	if mode == PathMode.ARC:
 		var radius := (start - handle_1).length()
 		var half_sine := value * 0.5 / radius
@@ -96,7 +95,7 @@ func _enter_tree():
 
 func _draw():
 	var last_pos := Vector2.ZERO
-	var count_nodes := skill_datas.size()
+	var count_nodes := node_datas.size()
 	var count_points := count_nodes + (1 if end_with_empty else 0)
 	var angle_diff := (start - handle_1).angle_to(end - handle_1)
 	var is_editor := Engine.is_editor_hint()
@@ -116,10 +115,10 @@ func _draw():
 				cur_pos = start.bezier_interpolate(handle_1, handle_2, end, float(i) / count_points)
 
 		last_pos = cur_pos
-		if i == 0 || skill_datas[i - 1] == null:
+		if i == 0 || node_datas[i - 1] == null:
 			continue
 
-		var tex := skill_datas[i - 1].texture
+		var tex := node_datas[i - 1].texture
 		var tex_size := tex.get_size()
 		var node := _node_controls[i - 1]
 		node.position = cur_pos - tex_size * 0.5
@@ -129,9 +128,8 @@ func _draw():
 
 
 func _set(property : StringName, value) -> bool:
-	if property == "skill_count":
-		skill_datas.resize(value)
-		skill_uid.resize(value)
+	if property == "node_count":
+		node_datas.resize(value)
 		notify_property_list_changed()
 		queue_redraw()
 		while _node_controls.size() < value:
@@ -145,17 +143,16 @@ func _set(property : StringName, value) -> bool:
 
 		return true
 
-	if property == "skill_set_all":
-		skill_datas.fill(value)
+	if property == "node_set_all":
+		node_datas.fill(value)
 		queue_redraw()
 		return true
 
-	if property.begins_with("skill_"):
-		var name_split := property.trim_prefix("skill_").split("/")
+	if property.begins_with("node_"):
+		var name_split := property.trim_prefix("node_").split("/")
 		var index := name_split[0].to_int()
 		match name_split[1]:
-			"data": skill_datas[index] = value
-			"index": skill_uid[index] = value
+			"data": node_datas[index] = value
 
 		queue_redraw()
 		return true
@@ -164,18 +161,17 @@ func _set(property : StringName, value) -> bool:
 
 
 func _get(property : StringName):
-	if property == "skill_count":
-		return skill_datas.size()
+	if property == "node_count":
+		return node_datas.size()
 
-	if property == "skill_set_all":
+	if property == "node_set_all":
 		return null
 
-	if property.begins_with("skill_"):
-		var name_split := property.trim_prefix("skill_").split("/")
+	if property.begins_with("node_"):
+		var name_split := property.trim_prefix("node_").split("/")
 		var index := name_split[0].to_int()
 		match name_split[1]:
-			"data": return skill_datas[index]
-			"index": return skill_uid[index]
+			"data": return node_datas[index]
 
 	return null
 
@@ -207,27 +203,23 @@ func _property_get_revert(property : StringName):
 func _get_property_list() -> Array:
 	var result := []
 	result.append({
-		&"name": "skill_count",
+		&"name": "node_count",
 		&"type": TYPE_INT,
 		&"usage": PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_ARRAY,
 		&"hint": PROPERTY_HINT_NONE,
 		&"hint_string": "",
-		&"class_name": "Skills,skill_",
+		&"class_name": "Path Nodes,node_",
 	})
-	for i in skill_datas.size():
+	for i in node_datas.size():
 		result.append({
-			&"name": "skill_%d/data" % i,
+			&"name": "node_%d/data" % i,
 			&"type": TYPE_OBJECT,
 			&"hint": PROPERTY_HINT_RESOURCE_TYPE,
 			&"hint_string": "WorldmapNodeData",
 		})
-		result.append({
-			&"name": "skill_%d/uid" % i,
-			&"type": TYPE_INT,
-		})
 	
 	result.append({
-		&"name": "skill_set_all",
+		&"name": "node_set_all",
 		&"type": TYPE_OBJECT,
 		&"hint": PROPERTY_HINT_RESOURCE_TYPE,
 		&"hint_string": "WorldmapNodeData",
@@ -237,7 +229,7 @@ func _get_property_list() -> Array:
 
 
 func _on_node_gui_input(event : InputEvent, index : int):
-	if skill_datas[index] == null:
+	if node_datas[index] == null:
 		return
 
-	node_gui_input.emit(event, skill_uid[index], skill_datas[index])
+	node_gui_input.emit(event, index, node_datas[index])
