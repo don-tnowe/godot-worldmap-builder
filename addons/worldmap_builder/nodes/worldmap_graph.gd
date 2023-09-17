@@ -63,6 +63,12 @@ func remove_node(index : int):
 			connection_nodes.remove_at(i)
 			connection_weights.remove_at(i)
 
+		if connection_nodes[i].x > index:
+			connection_nodes[i].x -= 1
+
+		if connection_nodes[i].y > index:
+			connection_nodes[i].y -= 1
+
 		i += 1
 
 	set(&"connection_count", connection_nodes.size())
