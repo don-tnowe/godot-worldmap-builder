@@ -1,6 +1,6 @@
 @tool
 class_name WorldmapPath
-extends Node2D
+extends WorldmapViewItem
 
 enum PathMode {
 	LINE = 0,
@@ -42,9 +42,9 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 	set(v):
 		end_with_empty = v
 		queue_redraw()
-@export var end_connections : Array[WorldmapPath]:
+@export var end_connections_with : Array[WorldmapViewItem]:
 	set(v):
-		end_connections = v
+		end_connections_with = v
 		queue_redraw()
 
 var node_datas : Array[WorldmapNodeData]
@@ -77,6 +77,10 @@ func set_distance_between_points(value : float):
 
 	elif mode == PathMode.LINE:
 		end = start + (end - start).normalized() * value * segment_count
+
+
+func get_end_connections():
+	return end_connections_with
 
 
 func _enter_tree():

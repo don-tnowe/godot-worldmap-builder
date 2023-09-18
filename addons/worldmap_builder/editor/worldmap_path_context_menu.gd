@@ -5,9 +5,16 @@ static func open_context_menu_for_marker(obj : Object, screen_position : Vector2
 	if obj is WorldmapGraph:
 		var menu_box := [null]  # Keep it under reference so callbacks can be told to reference it before it's created
 		menu_box[0] = open_context_menu(screen_position,
-			["Delete"],
-			[],
+			["Is End Connection", "Delete"],
 			[
+				obj.end_connection_nodes.find(marker_index) != -1,
+			],
+			[
+				(func(x):
+					obj.end_connection_nodes.erase(marker_index)
+					if x:
+						obj.end_connection_nodes.append(marker_index)
+					),
 				(func():
 					obj.remove_node(marker_index)
 					menu_box[0].hide()
@@ -212,6 +219,7 @@ static func open_context_menu(screen_position : Vector2, names : Array, values :
 
 			TYPE_BOOL:
 				prop_editor = CheckBox.new()
+				prop_editor.button_pressed = values[i]
 				prop_editor.toggled.connect(callbacks[i])
 				prop_editor.toggled.connect(plugin.update_overlays.unbind(1))
 

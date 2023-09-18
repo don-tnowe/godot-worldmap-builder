@@ -1,6 +1,6 @@
 @tool
 class_name WorldmapGraph
-extends Node2D
+extends WorldmapViewItem
 
 enum ConnectionMode {
 	BIDIRECTIONAL, ## Bidirectional connection. All [member connection_weights] are [code](1, 1)[/code].
@@ -26,9 +26,15 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 
 		notify_property_list_changed()
 @export var connection_min_length := 0.0
-@export var end_connections : Array[WorldmapPath]:
+## Nodes on this graph that can connect with overlapping [WorldmapViewItem]s, and act as snapping targets.
+@export var end_connection_nodes : Array[int]:
 	set(v):
-		end_connections = v
+		end_connection_nodes = v
+		queue_redraw()
+## [WorldmapViewItem]s this node is connected with.
+@export var end_connections_with : Array[WorldmapViewItem]:
+	set(v):
+		end_connections_with = v
 		queue_redraw()
 
 var node_datas : Array[WorldmapNodeData]
@@ -55,6 +61,7 @@ func add_node(pos : Vector2, parent_node : int):
 func remove_node(index : int):
 	node_datas.remove_at(index)
 	node_positions.remove_at(index)
+	end_connections_with.erase(index)
 	set(&"node_count", node_datas.size())
 
 	var i := 0
@@ -73,6 +80,19 @@ func remove_node(index : int):
 
 	set(&"connection_count", connection_nodes.size())
 	queue_redraw()
+
+
+func get_end_connections():
+	return end_connections_with
+
+
+func get_end_connection_positions():
+	var result : Array[Vector2] = []
+	result.resize(end_connection_nodes.size())
+	for i in result.size():
+		result[i] = node_positions[end_connection_nodes[i]]
+
+	return 
 
 
 func _enter_tree():

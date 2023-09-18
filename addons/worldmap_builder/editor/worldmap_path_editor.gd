@@ -4,6 +4,7 @@ const WorldmapEditorContextMenuClass := preload("res://addons/worldmap_builder/e
 
 var plugin : EditorPlugin
 
+var draw_connection_end_color := Color.GOLD
 var draw_line_color := Color.WHITE
 var draw_line_size := 2.0
 var draw_marker : Texture2D
@@ -33,6 +34,7 @@ func _handles(object : Object):
 
 func _forward_canvas_draw_over_viewport(overlay : Control):
 	if edited_object == null: return
+	var vp_xform := _get_viewport_xform()
 	var markers := _get_marker_positions()
 	if markers.size() <= last_dragging:
 		last_dragging = markers.size() - 1
@@ -50,7 +52,6 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 
 	if edited_object is WorldmapGraph:
 		var pos_arr : Array = edited_object.node_positions
-		var vp_xform := _get_viewport_xform()
 		var selected_node_pos := markers[last_dragging]
 		var add_node_distance : float = edited_object.connection_min_length
 		if add_node_distance <= 0.0:
@@ -88,8 +89,21 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 			var snapped_offset := Vector2(selected_node_radius * cos(snapped_angle), selected_node_radius * sin(snapped_angle))
 			overlay.draw_texture(draw_marker_add, selected_node_pos + snapped_offset - add_icon_size * 0.5)
 
-	for x in markers:
-		overlay.draw_texture(draw_marker, x - draw_marker.get_size() * 0.5)
+		var font := overlay.get_theme_font("Font", "EditorFonts")
+		var fontsize := overlay.get_theme_font_size("Font", "EditorFonts")
+		var node_index_string := str(last_dragging)
+		var index_label_size := font.get_string_size(node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
+		var index_label_offset := Vector2(-index_label_size.x * 0.5, -index_label_size.y - 0.5 * draw_marker.get_size().y)
+		overlay.draw_string_outline(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize, 4, Color.BLACK)
+		overlay.draw_string(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
+
+	var marker_size := draw_marker.get_size()
+	for i in markers.size():
+		overlay.draw_texture(draw_marker, markers[i] - marker_size * 0.5)
+
+	if edited_object is WorldmapGraph:
+		for x in edited_object.end_connection_nodes:
+			overlay.draw_texture(draw_marker, vp_xform * edited_object.node_positions[x] - marker_size * 0.5, draw_connection_end_color)
 
 
 func _forward_canvas_gui_input(event : InputEvent) -> bool:
@@ -209,6 +223,14 @@ func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : floa
 
 			if x.end.distance_squared_to(pos) < snap_distance_squared:
 				return x.end
+
+		elif x is WorldmapGraph:
+			if x == edited_object:
+				continue
+
+			for pt_index in x.end_connection_nodes:
+				if x.node_positions[pt_index].distance_squared_to(pos) < snap_distance_squared:
+					return x.node_positions[pt_index]
 
 		elif x is Node2D:
 			if x.position.distance_squared_to(pos) < snap_distance_squared:

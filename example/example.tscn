@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://4tmqw8w2u8o5"]
+[gd_scene load_steps=10 format=3 uid="uid://4tmqw8w2u8o5"]
 
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://b50a23pxlslin" path="res://example/skills/small_evasion.tres" id="6_jp1vb"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
 [ext_resource type="Resource" uid="uid://b1t0k6su5o8v" path="res://example/skills/small_mp.tres" id="8_41shr"]
+[ext_resource type="Resource" uid="uid://xy4g21ll2705" path="res://example/skills/small_weapon.tres" id="9_vbyll"]
 
 [node name="Map" type="Control"]
 layout_mode = 3
@@ -87,25 +88,25 @@ node_8/data = ExtResource("4_ytcj4")
 
 [node name="WorldmapGraph" type="Node2D" parent="."]
 script = ExtResource("7_miljq")
-connection_mode = 1
 connection_min_length = 64.0
+end_connection_nodes = Array[int]([6, 7, 4])
 node_count = 8
 node_0/data = ExtResource("8_41shr")
-node_0/position = Vector2(487.372, 415.416)
+node_0/position = Vector2(500, 475)
 node_1/data = ExtResource("8_41shr")
-node_1/position = Vector2(512.57, 334.781)
+node_1/position = Vector2(514.57, 416.781)
 node_2/data = ExtResource("8_41shr")
-node_2/position = Vector2(467.316, 289.526)
+node_2/position = Vector2(469.316, 371.526)
 node_3/data = ExtResource("8_41shr")
-node_3/position = Vector2(457.221, 223.672)
+node_3/position = Vector2(464.025, 306.729)
 node_4/data = ExtResource("8_41shr")
-node_4/position = Vector2(554.371, 266.944)
+node_4/position = Vector2(561.068, 373.324)
 node_5/data = ExtResource("8_41shr")
-node_5/position = Vector2(399.362, 260.135)
+node_5/position = Vector2(411.717, 342.51)
 node_6/data = ExtResource("8_41shr")
-node_6/position = Vector2(448.354, 151.127)
+node_6/position = Vector2(456.701, 237.35)
 node_7/data = ExtResource("8_41shr")
-node_7/position = Vector2(530.317, 185.872)
+node_7/position = Vector2(513.297, 266.357)
 connection_count = 7
 connection_0/nodes = Vector2i(0, 1)
 connection_1/nodes = Vector2i(1, 2)
@@ -114,3 +115,30 @@ connection_3/nodes = Vector2i(1, 4)
 connection_4/nodes = Vector2i(2, 5)
 connection_5/nodes = Vector2i(3, 6)
 connection_6/nodes = Vector2i(3, 7)
+
+[node name="WorldmapGraph2" type="Node2D" parent="."]
+script = ExtResource("7_miljq")
+connection_min_length = 64.0
+end_connection_nodes = Array[int]([0, 6])
+node_count = 7
+node_0/data = null
+node_0/position = Vector2(456.701, 237.35)
+node_1/data = ExtResource("9_vbyll")
+node_1/position = Vector2(392.701, 237.35)
+node_2/data = ExtResource("9_vbyll")
+node_2/position = Vector2(456.701, 173.35)
+node_3/data = ExtResource("9_vbyll")
+node_3/position = Vector2(520.112, 173.245)
+node_4/data = ExtResource("9_vbyll")
+node_4/position = Vector2(456.701, 109.35)
+node_5/data = ExtResource("9_vbyll")
+node_5/position = Vector2(392.822, 175.353)
+node_6/data = null
+node_6/position = Vector2(318.262, 137.505)
+connection_count = 6
+connection_0/nodes = Vector2i(0, 1)
+connection_1/nodes = Vector2i(0, 2)
+connection_2/nodes = Vector2i(2, 3)
+connection_3/nodes = Vector2i(2, 4)
+connection_4/nodes = Vector2i(1, 5)
+connection_5/nodes = Vector2i(5, 6)
