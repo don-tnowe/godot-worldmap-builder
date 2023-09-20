@@ -16,5 +16,5 @@ name = "Lesser Defense"
 desc = "+8 Defense
 Defense reduces damage received"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"defense", &"defensive", &"physical"])

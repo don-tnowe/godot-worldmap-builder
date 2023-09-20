@@ -67,17 +67,25 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 			var connection : Vector2i = edited_object.connection_nodes[i]
 			var connection_start : Vector2 = pos_arr[connection.x]
 			var connection_vec : Vector2 = pos_arr[connection.y] - connection_start
-			var connection_weights : Vector2 = edited_object.connection_weights[i]
+			var connection_costs : Vector2 = edited_object.connection_costs[i]
 			var poly_pt_offset := Vector2(-connection_vec.y, connection_vec.x).normalized() * draw_line_size * 0.5
 
-			var c1 := Color(draw_line_color, connection_weights.x / maxf(connection_weights.x, connection_weights.y))
-			var c2 := Color(draw_line_color, connection_weights.y / maxf(connection_weights.x, connection_weights.y))
+			var c1 := draw_line_color
+			var c2 := draw_line_color
+
+			if connection_costs.x == INF:
+				c1.a = 0.0
+				connection_costs.x = connection_costs.y
+
+			if connection_costs.y == INF:
+				c2.a = 0.0
+				connection_costs.y = connection_costs.x
 
 			overlay.draw_polygon([
-				vp_xform * (connection_start) + poly_pt_offset * maxf(connection_weights.x, 1.0),
-				vp_xform * (connection_start) - poly_pt_offset * maxf(connection_weights.x, 1.0),
-				vp_xform * (connection_start + connection_vec) - poly_pt_offset * maxf(connection_weights.y, 1.0),
-				vp_xform * (connection_start + connection_vec) + poly_pt_offset * maxf(connection_weights.y, 1.0),
+				vp_xform * (connection_start) + poly_pt_offset * maxf(connection_costs.x, 1.0),
+				vp_xform * (connection_start) - poly_pt_offset * maxf(connection_costs.x, 1.0),
+				vp_xform * (connection_start + connection_vec) - poly_pt_offset * maxf(connection_costs.y, 1.0),
+				vp_xform * (connection_start + connection_vec) + poly_pt_offset * maxf(connection_costs.y, 1.0),
 			], [
 				c1, c1, c2, c2,
 			])

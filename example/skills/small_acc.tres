@@ -16,5 +16,5 @@ name = "Lesser Accuracy"
 desc = "+8 Accuracy Rating
 Reduces effect of enemy Evasion Rating"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"accuracy"])

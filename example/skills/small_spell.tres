@@ -15,5 +15,5 @@ color = Color(0.509804, 0.227451, 1, 1)
 name = "Lesser Spell Damage"
 desc = "+4% Spell Damage"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"damage", &"magic"])

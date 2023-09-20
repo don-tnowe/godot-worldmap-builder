@@ -15,5 +15,5 @@ color = Color(0.709804, 0.709804, 0.709804, 1)
 name = "Lesser Learning"
 desc = "+4% Experience from Kills"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"experience", &"rewards"])

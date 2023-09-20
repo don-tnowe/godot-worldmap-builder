@@ -15,5 +15,5 @@ color = Color(0.227451, 0.509804, 1, 1)
 name = "Lesser Magic Energy"
 desc = "+20 Magic Points"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"mp", &"magic"])

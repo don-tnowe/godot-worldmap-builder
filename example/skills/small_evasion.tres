@@ -16,5 +16,5 @@ name = "Lesser Evasion"
 desc = "+8 Evasion Rating
 Evasion adds a chance to evade hits"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"evasion", &"defensive"])

@@ -3,9 +3,9 @@ class_name WorldmapGraph
 extends WorldmapViewItem
 
 enum ConnectionMode {
-	BIDIRECTIONAL, ## Bidirectional connection. All [member connection_weights] are [code](1, 1)[/code].
-	UNIDIRECTIONAL, ## Can only move from point X to Y. All [member connection_weights] are [code](1, 0)[/code].
-	CUSTOM, ## All [member connection_weights] can be changed. X and Y determine the cost of moving FROM the corresponding node. will be multiplied by the nodes' [member WorldmapNodeData.unlock_cost].
+	BIDIRECTIONAL, ## Bidirectional connection. All [member connection_costs] are [code](1, 1)[/code].
+	UNIDIRECTIONAL, ## Can only move from point X to Y. All [member connection_costs] are [code](1, INF)[/code].
+	CUSTOM, ## All [member connection_costs] can be changed. X and Y determine the cost of moving FROM the corresponding node. will be multiplied by the nodes' [member WorldmapNodeData.cost].
 }
 
 ## Emitted when a node on this path receives input.
@@ -17,33 +17,31 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 		connection_mode = v
 		match v:
 			ConnectionMode.BIDIRECTIONAL:
-				for i in connection_weights.size():
-					connection_weights[i] = Vector2(1, 1)
+				for i in connection_costs.size():
+					connection_costs[i] = Vector2(1, 1)
 
 			ConnectionMode.UNIDIRECTIONAL:
-				for i in connection_weights.size():
-					connection_weights[i] = Vector2(1, 0)
+				for i in connection_costs.size():
+					connection_costs[i] = Vector2(1, INF)
 
 		notify_property_list_changed()
 @export var connection_min_length := 0.0
-## Nodes on this graph that can connect with overlapping [WorldmapViewItem]s, and act as snapping targets.
+## Nodes on this graph that can connect with overlapping [WorldmapViewItem]s, and act as snapping targets. [br]
+## If the plugin is enabled, you can right-click a node to change this. Such nodes are shown as yellow.
 @export var end_connection_nodes : Array[int]:
 	set(v):
 		end_connection_nodes = v
-		queue_redraw()
-## [WorldmapViewItem]s this node is connected with.
-@export var end_connections_with : Array[WorldmapViewItem]:
-	set(v):
-		end_connections_with = v
 		queue_redraw()
 
 var node_datas : Array[WorldmapNodeData]
 var node_positions : Array[Vector2]
 
 var connection_nodes : Array[Vector2i]
-var connection_weights : Array[Vector2]
+var connection_costs : Array[Vector2]
 
 var _node_controls : Array[Control] = []
+var _node_neighbors := []
+var _costs_dict := {}
 var _arc_changing := false
 
 ## Adds a node at [code]pos[/code] and connects it to [code]parent_node[/code]. [br]
@@ -52,7 +50,7 @@ func add_node(pos : Vector2, parent_node : int):
 	node_datas.append(node_datas[parent_node])
 	node_positions.append(pos)
 	connection_nodes.append(Vector2i(parent_node, node_datas.size() - 1))
-	connection_weights.append(Vector2.ONE)
+	connection_costs.append(Vector2.ONE)
 	connection_mode = connection_mode  # Trigger setter to apply mode
 	_add_new_node_control()
 	queue_redraw()
@@ -61,14 +59,14 @@ func add_node(pos : Vector2, parent_node : int):
 func remove_node(index : int):
 	node_datas.remove_at(index)
 	node_positions.remove_at(index)
-	end_connections_with.erase(index)
+	end_connection_nodes.erase(index)
 	set(&"node_count", node_datas.size())
 
 	var i := 0
 	while i < connection_nodes.size():
 		if connection_nodes[i].x == index || connection_nodes[i].y == index:
 			connection_nodes.remove_at(i)
-			connection_weights.remove_at(i)
+			connection_costs.remove_at(i)
 
 		if connection_nodes[i].x > index:
 			connection_nodes[i].x -= 1
@@ -82,17 +80,33 @@ func remove_node(index : int):
 	queue_redraw()
 
 
-func get_end_connections():
-	return end_connections_with
-
-
-func get_end_connection_positions():
+func get_end_connection_positions() -> Array[Vector2]:
 	var result : Array[Vector2] = []
 	result.resize(end_connection_nodes.size())
 	for i in result.size():
 		result[i] = node_positions[end_connection_nodes[i]]
 
-	return 
+	return result
+
+
+func get_end_connection_indices() -> Array[int]:
+	return end_connection_nodes.duplicate()
+
+
+func get_node_position(index : int) -> Vector2:
+	return node_positions[index]
+
+
+func get_connection_cost(index1 : int, index2 : int) -> float:
+	return _costs_dict[Vector2i(index1, index2)]
+
+
+func get_node_neighbors(index : int) -> Array[int]:
+	return _node_neighbors[index]
+
+
+func get_node_data(index : int) -> WorldmapNodeData:
+	return node_datas[index]
 
 
 func _enter_tree():
@@ -163,8 +177,8 @@ func _set(property : StringName, value) -> bool:
 	if property.begins_with("connection_"):
 		if property == "connection_count":
 			connection_nodes.resize(value)
-			connection_weights.resize(value)
-			connection_mode = connection_mode  # Triggers setter: updates weights to (1, 1) or (1, 0)
+			connection_costs.resize(value)
+			connection_mode = connection_mode  # Triggers setter: updates costs to (1, 1) or (1, 0)
 			notify_property_list_changed()
 			queue_redraw()
 			return true
@@ -178,7 +192,9 @@ func _set(property : StringName, value) -> bool:
 			"nodes":
 				value = value.clamp(Vector2i.ZERO, Vector2i.ONE * (node_datas.size() - 1))
 				connection_nodes[index] = value
-			"weights": connection_weights[index] = value
+			"costs":
+				connection_costs[index] = value
+				_connections_changed()
 
 		queue_redraw()
 		return true
@@ -211,7 +227,7 @@ func _get(property : StringName):
 		var index := name_split[0].to_int()
 		match name_split[1]:
 			"nodes": return connection_nodes[index]
-			"weights": return connection_weights[index]
+			"costs": return connection_costs[index]
 
 	return null
 
@@ -261,19 +277,40 @@ func _get_property_list() -> Array:
 		&"hint_string": "",
 		&"class_name": "Path Connections,connection_",
 	})
-	var show_weights := connection_mode == ConnectionMode.CUSTOM
+	var show_costs := connection_mode == ConnectionMode.CUSTOM
 	for i in connection_nodes.size():
 		result.append({
 			&"name": "connection_%d/nodes" % i,
 			&"type": TYPE_VECTOR2I,
 		})
-		if show_weights:
+		if show_costs:
 			result.append({
-				&"name": "connection_%d/weights" % i,
+				&"name": "connection_%d/costs" % i,
 				&"type": TYPE_VECTOR2,
 			})
 	
 	return result
+
+
+func _connections_changed():
+	_node_neighbors.resize(node_datas.size())
+	_costs_dict.clear()
+	for i in node_datas.size():
+		_node_neighbors[i] = []
+
+	for i in connection_nodes.size():
+		var costs_pair := connection_costs[i]
+		var nodes_pair := connection_nodes[i]
+		costs_pair.x *= node_datas[nodes_pair.x].cost if node_datas[nodes_pair.x] != null else 0.0
+		costs_pair.y *= node_datas[nodes_pair.y].cost if node_datas[nodes_pair.y] != null else 0.0
+		_costs_dict[nodes_pair] = costs_pair
+		_costs_dict[Vector2(nodes_pair.y, nodes_pair.x)] = Vector2(costs_pair.x, costs_pair.y)
+
+		if costs_pair.x != INF:
+			_node_neighbors[nodes_pair.x].append(nodes_pair.y)
+
+		if costs_pair.y != INF:
+			_node_neighbors[nodes_pair.y].append(nodes_pair.x)
 
 
 func _on_node_gui_input(event : InputEvent, index : int):

@@ -15,5 +15,5 @@ color = Color(0.729412, 0.227451, 1, 1)
 name = "Lesser Elemental Damage"
 desc = "+4% All Elemental Damage"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"elemental", &"damage"])

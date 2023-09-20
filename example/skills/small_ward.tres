@@ -16,5 +16,5 @@ name = "Lesser Ward"
 desc = "+12 Maximum Ward
 Ward is depleted before Health, and regenerates quickly"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"ward", &"defensive", &"magic"])

@@ -15,5 +15,5 @@ color = Color(1, 0.356863, 0.690196, 1)
 name = "Lesser Life"
 desc = "+20 Health Points"
 size_tier = 0
-unlock_cost = 1
+cost = 1
 tags = Array[StringName]([&"small", &"hp", &"physical"])

@@ -15,7 +15,11 @@ extends Resource
 
 ## Node size tier. Used by developer, intended for skills or stages of varying importance.
 @export var size_tier := 0
-## Node unlock cost. Used as pathfinding cost.
-@export var unlock_cost := 1
+## The cost of moving onto this node, if possible. Used for pathfinding.
+@export var cost := 1
 ## Node tags. Used by developer.
 @export var tags : Array[StringName]
+
+
+func _to_string() -> String:
+  return "[Node: %s (%s)]" % [name, id]

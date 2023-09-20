@@ -42,10 +42,6 @@ signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData
 	set(v):
 		end_with_empty = v
 		queue_redraw()
-@export var end_connections_with : Array[WorldmapViewItem]:
-	set(v):
-		end_connections_with = v
-		queue_redraw()
 
 var node_datas : Array[WorldmapNodeData]
 
@@ -79,8 +75,54 @@ func set_distance_between_points(value : float):
 		end = start + (end - start).normalized() * value * segment_count
 
 
-func get_end_connections():
-	return end_connections_with
+func get_end_connection_indices() -> Array[int]:
+	return [0, _node_controls.size() - 1]
+
+
+func get_end_connection_positions() -> Array[Vector2]:
+	return [start, end]
+
+
+func get_node_position(index : int) -> Vector2:
+	return _get_node_position_precalc(
+		index,
+		node_datas.size() + (1 if end_with_empty else 0),
+		(start - handle_1).angle_to(end - handle_1) if mode == PathMode.ARC else 0.0
+	)
+
+
+func get_connection_cost(index1 : int, index2 : int) -> float:
+	if !bidirectional && index1 > index2:
+		return INF
+
+	if absi(index1 - index2) != 1:
+		return INF
+
+	var data := get_node_data(index2)
+	if data == null:
+		return 0.0
+
+	return data.cost
+
+
+func get_node_neighbors(index : int) -> Array[int]:
+	if index == 0:
+		return [index + 1]
+
+	if index == node_datas.size() - 1:
+		return [index - 1] if bidirectional else []
+
+	if index < 0 || index >= node_datas.size():
+		return []
+
+	return [index - 1, index + 1] if bidirectional else [index + 1]
+
+
+func get_node_data(index : int) -> WorldmapNodeData:
+	if index > node_datas.size() || index == 0:
+		return null
+
+	return node_datas[index - 1]
 
 
 func _enter_tree():
@@ -98,7 +140,6 @@ func _enter_tree():
 
 
 func _draw():
-	var last_pos := Vector2.ZERO
 	var count_nodes := node_datas.size()
 	var count_points := count_nodes + (1 if end_with_empty else 0)
 	var angle_diff := (start - handle_1).angle_to(end - handle_1)
@@ -107,18 +148,7 @@ func _draw():
 		x.hide()
 
 	for i in count_nodes + 1:
-		var cur_pos := last_pos
-		match mode:
-			PathMode.LINE:
-				cur_pos = lerp(start, end, float(i) / count_points)
-
-			PathMode.ARC:
-				cur_pos = (start - handle_1).rotated(angle_diff * i / count_points) + handle_1
-
-			PathMode.BEZIER:
-				cur_pos = start.bezier_interpolate(handle_1, handle_2, end, float(i) / count_points)
-
-		last_pos = cur_pos
+		var cur_pos := _get_node_position_precalc(i, count_points, angle_diff)
 		if i == 0 || node_datas[i - 1] == null:
 			continue
 
@@ -230,6 +260,21 @@ func _get_property_list() -> Array:
 		&"usage": PROPERTY_USAGE_EDITOR,
 	})
 	return result
+
+
+func _get_node_position_precalc(index : int, count_points, angle_diff) -> Vector2:
+	match mode:
+		PathMode.LINE:
+			return lerp(start, end, float(index) / count_points)
+
+		PathMode.ARC:
+			return (start - handle_1).rotated(angle_diff * index / count_points) + handle_1
+
+		PathMode.BEZIER:
+			return start.bezier_interpolate(handle_1, handle_2, end, float(index) / count_points)
+
+		_:
+			return Vector2()
 
 
 func _on_node_gui_input(event : InputEvent, index : int):
