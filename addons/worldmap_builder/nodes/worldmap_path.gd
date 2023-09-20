@@ -83,10 +83,14 @@ func get_end_connection_positions() -> Array[Vector2]:
 	return [start, end]
 
 
+func get_node_count() -> int:
+	return node_datas.size() + (2 if end_with_empty else 1)
+
+
 func get_node_position(index : int) -> Vector2:
 	return _get_node_position_precalc(
 		index,
-		node_datas.size() + (1 if end_with_empty else 0),
+		get_node_count() - 1,
 		(start - handle_1).angle_to(end - handle_1) if mode == PathMode.ARC else 0.0
 	)
 
@@ -103,6 +107,15 @@ func get_connection_cost(index1 : int, index2 : int) -> float:
 		return 0.0
 
 	return data.cost
+
+
+func get_connections() -> Array[Vector2i]:
+	var connection_list : Array[Vector2i] = []
+	connection_list.resize(get_node_count() - 1)
+	for i in connection_list.size():
+		connection_list[i] = Vector2i(i, i + 1)
+
+	return connection_list
 
 
 func get_node_neighbors(index : int) -> Array[int]:
@@ -140,15 +153,19 @@ func _enter_tree():
 
 
 func _draw():
-	var count_nodes := node_datas.size()
-	var count_points := count_nodes + (1 if end_with_empty else 0)
+	var count_points := get_node_count() - 1
 	var angle_diff := (start - handle_1).angle_to(end - handle_1)
 	var is_editor := Engine.is_editor_hint()
 	for x in _node_controls:
 		x.hide()
 
-	for i in count_nodes + 1:
+	var prev_pos := Vector2.ZERO
+	for i in node_datas.size() + 1:
 		var cur_pos := _get_node_position_precalc(i, count_points, angle_diff)
+		if is_editor && i != 0:
+			draw_line(prev_pos, cur_pos, Color.ORANGE_RED, 4.0)
+
+		prev_pos = cur_pos
 		if i == 0 || node_datas[i - 1] == null:
 			continue
 
@@ -158,7 +175,8 @@ func _draw():
 		node.position = cur_pos - tex_size * 0.5
 		node.size = tex_size
 		node.show()
-		draw_texture(tex, cur_pos - tex_size * 0.5)
+		if is_editor:
+			draw_texture(tex, cur_pos - tex_size * 0.5)
 
 
 func _set(property : StringName, value) -> bool:

@@ -1,20 +1,82 @@
-[gd_scene load_steps=10 format=3 uid="uid://4tmqw8w2u8o5"]
+[gd_scene load_steps=21 format=3 uid="uid://4tmqw8w2u8o5"]
 
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
+[ext_resource type="Texture2D" uid="uid://dfwrk73ka6j8x" path="res://example/skilltree_borders.png" id="2_76jt8"]
+[ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/wordmap_style.gd" id="2_oxm7o"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
 [ext_resource type="Resource" uid="uid://bauso3p8ba010" path="res://example/skills/small_hp.tres" id="2_xtlsu"]
 [ext_resource type="Resource" uid="uid://momqsxlp1gfs" path="res://example/skills/small_elemental.tres" id="4_ytcj4"]
 [ext_resource type="Resource" uid="uid://c31230cm8np7i" path="res://example/skills/small_acc.tres" id="5_fevd2"]
+[ext_resource type="Resource" uid="uid://dqwiht23gapri" path="res://example/skills/small_xp.tres" id="5_sdu2a"]
 [ext_resource type="Resource" uid="uid://b50a23pxlslin" path="res://example/skills/small_evasion.tres" id="6_jp1vb"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
 [ext_resource type="Resource" uid="uid://b1t0k6su5o8v" path="res://example/skills/small_mp.tres" id="8_41shr"]
 [ext_resource type="Resource" uid="uid://xy4g21ll2705" path="res://example/skills/small_weapon.tres" id="9_vbyll"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_vql2y"]
+atlas = ExtResource("2_76jt8")
+region = Rect2(32, 16, 32, 32)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_w5rdv"]
+load_path = "res://.godot/imported/skilltree_borders.png-b022ab63f57155a8a0a421454feb26f1.ctex"
+
+[sub_resource type="Resource" id="Resource_aa6er"]
+resource_name = "Active"
+script = ExtResource("2_oxm7o")
+icon_modulate = Color(1, 1, 1, 1)
+icon_border_modulate = Color(1, 1, 1, 1)
+connection_modulate = Color(1, 1, 1, 1)
+icon_borders = Array[Texture2D]([SubResource("AtlasTexture_vql2y")])
+straight_tex = SubResource("CompressedTexture2D_w5rdv")
+straight_tex_region = Rect2(0, 8, 128, 8)
+straight_tex_repeat = false
+priority = 10
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pr8m7"]
+atlas = ExtResource("2_76jt8")
+region = Rect2(64, 16, 32, 32)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_6ivhx"]
+load_path = "res://.godot/imported/skilltree_borders.png-b022ab63f57155a8a0a421454feb26f1.ctex"
+
+[sub_resource type="Resource" id="Resource_4xltf"]
+resource_name = "Can Activate"
+script = ExtResource("2_oxm7o")
+icon_modulate = Color(1, 1, 1, 1)
+icon_border_modulate = Color(1, 1, 1, 1)
+connection_modulate = Color(1, 1, 1, 1)
+icon_borders = Array[Texture2D]([SubResource("AtlasTexture_pr8m7")])
+straight_tex = SubResource("CompressedTexture2D_6ivhx")
+straight_tex_region = Rect2(0, 8, 128, 8)
+straight_tex_repeat = false
+priority = -10
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wm6gh"]
+atlas = ExtResource("2_76jt8")
+region = Rect2(0, 16, 32, 32)
+
+[sub_resource type="Resource" id="Resource_2hquj"]
+resource_name = "Inactive"
+script = ExtResource("2_oxm7o")
+icon_modulate = Color(1, 1, 1, 1)
+icon_border_modulate = Color(1, 1, 1, 1)
+connection_modulate = Color(1, 1, 1, 1)
+icon_borders = Array[Texture2D]([SubResource("AtlasTexture_wm6gh")])
+straight_tex = ExtResource("2_76jt8")
+straight_tex_region = Rect2(0, 0, 128, 8)
+straight_tex_repeat = false
+priority = 0
+
 [node name="Map" type="Control"]
+custom_minimum_size = Vector2(1042.63, 609.388)
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1_fafx5")
+style_active = SubResource("Resource_aa6er")
+style_can_activate = SubResource("Resource_4xltf")
+style_inactive = SubResource("Resource_2hquj")
+metadata/_edit_lock_ = true
 
 [node name="Path" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
@@ -24,14 +86,14 @@ handle_1 = Vector2(-37, 37)
 handle_2 = Vector2(-52, 422.492)
 bidirectional = true
 node_count = 8
-node_0/data = ExtResource("2_xtlsu")
+node_0/data = ExtResource("5_sdu2a")
 node_1/data = ExtResource("2_xtlsu")
 node_2/data = ExtResource("2_xtlsu")
 node_3/data = ExtResource("2_xtlsu")
 node_4/data = ExtResource("2_xtlsu")
 node_5/data = ExtResource("2_xtlsu")
 node_6/data = ExtResource("2_xtlsu")
-node_7/data = ExtResource("2_xtlsu")
+node_7/data = ExtResource("5_sdu2a")
 
 [node name="Path2" type="Node2D" parent="."]
 script = ExtResource("2_oyim1")
@@ -92,34 +154,31 @@ node_8/data = ExtResource("4_ytcj4")
 
 [node name="WorldmapGraph" type="Node2D" parent="."]
 script = ExtResource("7_miljq")
-connection_mode = 1
 connection_min_length = 64.0
-end_connection_nodes = Array[int]([6, 4, 7])
-node_count = 8
+end_connection_nodes = Array[int]([6, 4])
+node_count = 7
 node_0/data = ExtResource("8_41shr")
-node_0/position = Vector2(503.012, 479.593)
+node_0/position = Vector2(471.517, 365.482)
 node_1/data = ExtResource("8_41shr")
-node_1/position = Vector2(514.57, 416.781)
+node_1/position = Vector2(464.025, 306.729)
 node_2/data = ExtResource("8_41shr")
-node_2/position = Vector2(469.316, 371.526)
+node_2/position = Vector2(561.068, 373.324)
 node_3/data = ExtResource("8_41shr")
-node_3/position = Vector2(464.025, 306.729)
+node_3/position = Vector2(411.717, 342.51)
 node_4/data = ExtResource("8_41shr")
-node_4/position = Vector2(561.068, 373.324)
+node_4/position = Vector2(456.701, 237.35)
 node_5/data = ExtResource("8_41shr")
-node_5/position = Vector2(411.717, 342.51)
+node_5/position = Vector2(513.792, 271.762)
 node_6/data = ExtResource("8_41shr")
-node_6/position = Vector2(456.701, 237.35)
-node_7/data = ExtResource("8_41shr")
-node_7/position = Vector2(513.297, 266.357)
+node_6/position = Vector2(519.38, 422.8)
 connection_count = 7
-connection_0/nodes = Vector2i(0, 1)
-connection_1/nodes = Vector2i(1, 4)
-connection_2/nodes = Vector2i(1, 2)
-connection_3/nodes = Vector2i(2, 5)
-connection_4/nodes = Vector2i(2, 3)
-connection_5/nodes = Vector2i(3, 7)
-connection_6/nodes = Vector2i(3, 6)
+connection_0/nodes = Vector2i(0, 3)
+connection_1/nodes = Vector2i(0, 1)
+connection_2/nodes = Vector2i(1, 5)
+connection_3/nodes = Vector2i(1, 4)
+connection_4/nodes = Vector2i(6, 6)
+connection_5/nodes = Vector2i(6, 0)
+connection_6/nodes = Vector2i(6, 2)
 
 [node name="WorldmapGraph2" type="Node2D" parent="."]
 script = ExtResource("7_miljq")
@@ -141,9 +200,9 @@ node_5/position = Vector2(392.822, 175.353)
 node_6/data = null
 node_6/position = Vector2(318.262, 137.505)
 connection_count = 6
-connection_0/nodes = Vector2i(0, 1)
-connection_1/nodes = Vector2i(0, 2)
-connection_2/nodes = Vector2i(2, 3)
-connection_3/nodes = Vector2i(2, 4)
-connection_4/nodes = Vector2i(1, 5)
-connection_5/nodes = Vector2i(5, 6)
+connection_0/nodes = Vector2i(2, 4)
+connection_1/nodes = Vector2i(1, 5)
+connection_2/nodes = Vector2i(5, 6)
+connection_3/nodes = Vector2i(0, 1)
+connection_4/nodes = Vector2i(0, 2)
+connection_5/nodes = Vector2i(3, 2)

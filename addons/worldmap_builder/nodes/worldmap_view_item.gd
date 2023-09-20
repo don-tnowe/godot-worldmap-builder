@@ -12,9 +12,19 @@ func get_end_connection_positions() -> Array[Vector2]:
 	return []
 
 
+func get_node_count() -> int:
+	assert(false, "Method WorldmapViewItem::get_node_count() not implemented!")
+	return 0
+
+
 func get_node_position(index : int) -> Vector2:
 	assert(false, "Method WorldmapViewItem::get_node_position() not implemented!")
 	return Vector2.ZERO
+
+
+func get_connections() -> Array[Vector2i]:
+	assert(false, "Method WorldmapViewItem::get_connections() not implemented!")
+	return []
 
 
 func get_connection_cost(index1 : int, index2 : int) -> float:

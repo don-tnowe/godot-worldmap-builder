@@ -127,12 +127,20 @@ func get_end_connection_indices() -> Array[int]:
 	return end_connection_nodes.duplicate()
 
 
+func get_node_count() -> int:
+	return node_datas.size()
+
+
 func get_node_position(index : int) -> Vector2:
 	return node_positions[index]
 
 
 func get_connection_cost(index1 : int, index2 : int) -> float:
 	return _costs_dict[Vector2i(index1, index2)]
+
+
+func get_connections() -> Array[Vector2i]:
+	return connection_nodes.duplicate()
 
 
 func get_node_neighbors(index : int) -> Array[int]:
@@ -156,6 +164,10 @@ func _draw():
 	for x in _node_controls:
 		x.hide()
 
+	if is_editor:
+		for x in connection_nodes:
+			draw_line(node_positions[x.x], node_positions[x.y], Color.ORANGE_RED, 4.0)
+
 	for i in node_datas.size():
 		if node_datas[i] == null:
 			continue
@@ -166,7 +178,8 @@ func _draw():
 		node.position = node_positions[i] - tex_size * 0.5
 		node.size = tex_size
 		node.show()
-		draw_texture(tex, node_positions[i] - tex_size * 0.5)
+		if is_editor:
+			draw_texture(tex, node_positions[i] - tex_size * 0.5)
 
 
 func _add_new_node_control():
