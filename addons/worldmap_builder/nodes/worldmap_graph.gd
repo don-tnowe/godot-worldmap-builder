@@ -49,9 +49,7 @@ var _arc_changing := false
 func add_node(pos : Vector2, parent_node : int):
 	node_datas.append(node_datas[parent_node])
 	node_positions.append(pos)
-	connection_nodes.append(Vector2i(parent_node, node_datas.size() - 1))
-	connection_costs.append(Vector2.ONE)
-	connection_mode = connection_mode  # Trigger setter to apply mode
+	set_connected(parent_node, node_datas.size() - 1, true)
 	_add_new_node_control()
 	queue_redraw()
 
@@ -78,6 +76,42 @@ func remove_node(index : int):
 
 	set(&"connection_count", connection_nodes.size())
 	queue_redraw()
+
+## Makes nodes with the specified indices connected or disconnected. Will remove both directions.
+func set_connected(index1 : int, index2 : int, connected : bool):
+	var i := 0
+	while i < connection_nodes.size():
+		var connection := connection_nodes[i]
+		if connection.x == index1 && connection.y == index2:
+			connection_nodes.remove_at(i)
+			connection_costs.remove_at(i)
+			continue
+
+		if connection.y == index1 && connection.x == index2:
+			connection_nodes.remove_at(i)
+			connection_costs.remove_at(i)
+			continue
+
+		i += 1
+
+	if connected:
+		connection_nodes.append(Vector2i(index1, index2))
+		connection_costs.append(Vector2.ONE)
+
+	_connections_changed()
+
+## Returns [code]true[/code] if the connection exists in either direction, [b]regardless if it's traversible[/b]. [br]
+## For checking traversibility, use [method get_connection_cost].
+func connection_exists(index1 : int, index2 : int) -> bool:
+	for i in connection_nodes.size():
+		var connection := connection_nodes[i]
+		if connection.x == index1 && connection.y == index2:
+			return true
+
+		if connection.y == index1 && connection.x == index2:
+			return true
+
+	return false
 
 
 func get_end_connection_positions() -> Array[Vector2]:
@@ -178,7 +212,7 @@ func _set(property : StringName, value) -> bool:
 		if property == "connection_count":
 			connection_nodes.resize(value)
 			connection_costs.resize(value)
-			connection_mode = connection_mode  # Triggers setter: updates costs to (1, 1) or (1, 0)
+			_connections_changed()
 			notify_property_list_changed()
 			queue_redraw()
 			return true
@@ -293,6 +327,7 @@ func _get_property_list() -> Array:
 
 
 func _connections_changed():
+	connection_mode = connection_mode  # Triggers setter: updates costs to (1, 1) or (1, 0)
 	_node_neighbors.resize(node_datas.size())
 	_costs_dict.clear()
 	for i in node_datas.size():

@@ -9,7 +9,10 @@ var draw_line_color := Color.WHITE
 var draw_line_size := 2.0
 var draw_marker : Texture2D
 var draw_marker_add : Texture2D
+var draw_marker_checkbox_checked : Texture2D
+var draw_marker_checkbox_unchecked : Texture2D
 var snap_angle := 5.0
+var button_margin := 4.0
 
 var edited_object : Object:
 	set(v):
@@ -25,6 +28,8 @@ func _init(plugin : EditorPlugin):
 	var ctrl := plugin.get_editor_interface().get_base_control()
 	draw_marker = ctrl.get_theme_icon(&"EditorPathSharpHandle", &"EditorIcons")
 	draw_marker_add = ctrl.get_theme_icon(&"EditorHandleAdd", &"EditorIcons")
+	draw_marker_checkbox_checked = ctrl.get_theme_icon(&"checked", &"CheckBox")
+	draw_marker_checkbox_unchecked = ctrl.get_theme_icon(&"unchecked", &"CheckBox")
 	self.plugin = plugin
 
 
@@ -57,14 +62,28 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 		if add_node_distance <= 0.0:
 			add_node_distance = 32.0
 
+		# --- Add Node ring
+
 		var selected_node_radius := vp_xform.get_scale().x * add_node_distance
 		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.05, PI * 0.45, 8, draw_line_color, draw_line_size)
 		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.55, PI * 0.95, 8, draw_line_color, draw_line_size)
 		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.05, PI * 1.45, 8, draw_line_color, draw_line_size)
 		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.55, PI * 1.95, 8, draw_line_color, draw_line_size)
 
+		# --- Connection lines
+
+		var connections_with_selected : Array[bool] = []
+		connections_with_selected.resize(markers.size())
+		connections_with_selected.fill(false)
 		for i in edited_object.connection_nodes.size():
 			var connection : Vector2i = edited_object.connection_nodes[i]
+
+			if connection.x == last_dragging:
+				connections_with_selected[connection.y] = true
+
+			if connection.y == last_dragging:
+				connections_with_selected[connection.x] = true
+
 			var connection_start : Vector2 = pos_arr[connection.x]
 			var connection_vec : Vector2 = pos_arr[connection.y] - connection_start
 			var connection_costs : Vector2 = edited_object.connection_costs[i]
@@ -90,12 +109,26 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 				c1, c1, c2, c2,
 			])
 
+		# --- Checkboxes for connections
+
+		var checkbox_size := draw_marker_checkbox_checked.get_size()
+		for i in markers.size():
+			if i == last_dragging:
+				continue
+
+			var tex := draw_marker_checkbox_checked if connections_with_selected[i] else draw_marker_checkbox_unchecked
+			overlay.draw_texture(tex, markers[i].move_toward(markers[last_dragging], checkbox_size.x + checkbox_size.y) - checkbox_size * 0.5)
+
+		# --- Add Node ring: add position marker
+
 		var add_icon_size := draw_marker_add.get_size()
 		var mouse_pos := overlay.get_local_mouse_position()
 		if _is_within_ring(mouse_pos, selected_node_pos, selected_node_radius, add_icon_size.x):
 			var snapped_angle := snappedf((mouse_pos - selected_node_pos).angle(), deg_to_rad(snap_angle))
 			var snapped_offset := Vector2(selected_node_radius * cos(snapped_angle), selected_node_radius * sin(snapped_angle))
 			overlay.draw_texture(draw_marker_add, selected_node_pos + snapped_offset - add_icon_size * 0.5)
+
+		# --- Node index label
 
 		var font := overlay.get_theme_font("Font", "EditorFonts")
 		var fontsize := overlay.get_theme_font_size("Font", "EditorFonts")
@@ -115,13 +148,13 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 
 
 func _forward_canvas_gui_input(event : InputEvent) -> bool:
-	plugin.update_overlays()
 	if edited_object == null: return false
 
 	var marker_radius_squared := draw_marker.get_size().x * 0.5
 	marker_radius_squared *= marker_radius_squared
 
 	if event is InputEventMouseButton:
+		plugin.update_overlays.call_deferred()
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			var was_dragging := dragging
 			dragging = -1
@@ -157,7 +190,12 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 			return false
 
 	if event is InputEventMouseMotion:
-		return _handle_drag(event)
+		if dragging != -1:
+			return _handle_drag(event)
+
+		# TODO: only update if view actually changes
+		plugin.update_overlays()
+		return false
 
 	return false
 
@@ -191,20 +229,40 @@ func _handle_drag(event : InputEventMouseMotion) -> bool:
 	undoredo.add_do_property(edited_object, property, target_value)
 	undoredo.commit_action(true)
 
+	plugin.update_overlays()
 	return true
 
 
 func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
 	if edited_object is WorldmapGraph:
 		var vp_xform := _get_viewport_xform()
+		var selected_node_pos : Vector2 = edited_object.node_positions[last_dragging]
+		var mouse_pos := event.position
+
+		# --- Add Connection checkboxes
+
+		var checkbox_size := draw_marker_checkbox_checked.get_size() + Vector2.ONE * (button_margin + button_margin)
+		var checkbox_offset := checkbox_size.x + checkbox_size.y - button_margin * 4.0
+		var selected_node_pos_onscreen := vp_xform * selected_node_pos
+		for i in edited_object.node_positions.size():
+			if i == last_dragging:
+				continue
+
+			var checkbox_origin : Vector2 = (vp_xform * edited_object.node_positions[i]).move_toward(selected_node_pos_onscreen, checkbox_offset)
+			if Rect2(checkbox_origin - checkbox_size * 0.5, checkbox_size).has_point(mouse_pos):
+				edited_object.set_connected(last_dragging, i, !edited_object.connection_exists(last_dragging, i))
+				plugin.update_overlays()
+				return true
+
+		# --- Add Node ring
+
 		var add_node_distance : float = edited_object.connection_min_length
 		if add_node_distance <= 0.0:
 			add_node_distance = 32.0
 
 		var selected_node_radius := vp_xform.get_scale().x * add_node_distance
-		var selected_node_pos : Vector2 = edited_object.node_positions[last_dragging]
-		if _is_within_ring(event.position, vp_xform * selected_node_pos, selected_node_radius, draw_marker_add.get_width()):
-			var snapped_angle := snappedf((event.position - vp_xform * selected_node_pos).angle(), deg_to_rad(snap_angle))
+		if _is_within_ring(mouse_pos, selected_node_pos_onscreen, selected_node_radius, draw_marker_add.get_width()):
+			var snapped_angle := snappedf((mouse_pos - selected_node_pos_onscreen).angle(), deg_to_rad(snap_angle))
 			var snapped_offset := Vector2(add_node_distance * cos(snapped_angle), add_node_distance * sin(snapped_angle))
 			edited_object.add_node(selected_node_pos + snapped_offset, last_dragging)
 			last_dragging = edited_object.node_datas.size() - 1

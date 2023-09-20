@@ -92,6 +92,7 @@ node_8/data = ExtResource("4_ytcj4")
 
 [node name="WorldmapGraph" type="Node2D" parent="."]
 script = ExtResource("7_miljq")
+connection_mode = 1
 connection_min_length = 64.0
 end_connection_nodes = Array[int]([6, 4, 7])
 node_count = 8
@@ -113,12 +114,12 @@ node_7/data = ExtResource("8_41shr")
 node_7/position = Vector2(513.297, 266.357)
 connection_count = 7
 connection_0/nodes = Vector2i(0, 1)
-connection_1/nodes = Vector2i(1, 2)
-connection_2/nodes = Vector2i(2, 3)
-connection_3/nodes = Vector2i(1, 4)
-connection_4/nodes = Vector2i(2, 5)
-connection_5/nodes = Vector2i(3, 6)
-connection_6/nodes = Vector2i(3, 7)
+connection_1/nodes = Vector2i(1, 4)
+connection_2/nodes = Vector2i(1, 2)
+connection_3/nodes = Vector2i(2, 5)
+connection_4/nodes = Vector2i(2, 3)
+connection_5/nodes = Vector2i(3, 7)
+connection_6/nodes = Vector2i(3, 6)
 
 [node name="WorldmapGraph2" type="Node2D" parent="."]
 script = ExtResource("7_miljq")
