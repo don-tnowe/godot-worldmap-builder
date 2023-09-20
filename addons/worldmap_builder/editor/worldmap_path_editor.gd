@@ -159,15 +159,15 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 			var was_dragging := dragging
 			dragging = -1
 			if event.pressed:
-				if _handle_non_marker_click(event):
-					return true
-
 				var markers := _get_marker_positions()
 				for i in markers.size():
 					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
 						dragging = i
 						last_dragging = i
 						return true
+
+				if _handle_non_marker_click(event):
+					return true
 
 			elif was_dragging != -1:
 				plugin.get_undo_redo().create_action("Finish Moving Handle")
