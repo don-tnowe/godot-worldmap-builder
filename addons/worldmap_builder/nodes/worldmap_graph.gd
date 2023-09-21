@@ -8,9 +8,6 @@ enum ConnectionMode {
 	CUSTOM, ## All [member connection_costs] can be changed. X and Y determine the cost of moving FROM the corresponding node. will be multiplied by the nodes' [member WorldmapNodeData.cost].
 }
 
-## Emitted when a node on this path receives input.
-signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData)
-
 @export_group("Path")
 @export var connection_mode : ConnectionMode:
 	set(v):
@@ -43,6 +40,10 @@ var _node_controls : Array[Control] = []
 var _node_neighbors := []
 var _costs_dict := {}
 var _arc_changing := false
+
+
+func _ready():
+	_connections_changed()
 
 ## Adds a node at [code]pos[/code] and connects it to [code]parent_node[/code]. [br]
 ## [member node_datas] is copied from the parent.
@@ -136,7 +137,15 @@ func get_node_position(index : int) -> Vector2:
 
 
 func get_connection_cost(index1 : int, index2 : int) -> float:
-	return _costs_dict[Vector2i(index1, index2)]
+	var cost : Vector2 = _costs_dict.get(Vector2i(index1, index2), Vector2(-INF, -INF))
+	if cost == Vector2(-INF, -INF):
+		var index_swap := index1
+		index1 = index2
+		index2 = index_swap
+		cost = _costs_dict.get(Vector2i(index1, index2), Vector2(INF, INF))
+		cost = Vector2(cost.y, cost.x)
+
+	return cost.x
 
 
 func get_connections() -> Array[Vector2i]:
@@ -185,6 +194,8 @@ func _draw():
 func _add_new_node_control():
 	var new_control := Control.new()
 	new_control.gui_input.connect(_on_node_gui_input.bind(_node_controls.size()))
+	new_control.mouse_exited.connect(_on_node_mouse_exited.bind(_node_controls.size()))
+	new_control.mouse_entered.connect(_on_node_mouse_entered.bind(_node_controls.size()))
 	add_child(new_control)
 	_node_controls.append(new_control)
 
@@ -344,13 +355,14 @@ func _connections_changed():
 	_node_neighbors.resize(node_datas.size())
 	_costs_dict.clear()
 	for i in node_datas.size():
-		_node_neighbors[i] = []
+		var new_arr : Array[int] = []
+		_node_neighbors[i] = new_arr
 
 	for i in connection_nodes.size():
 		var costs_pair := connection_costs[i]
 		var nodes_pair := connection_nodes[i]
-		costs_pair.x *= node_datas[nodes_pair.x].cost if node_datas[nodes_pair.x] != null else 0.0
-		costs_pair.y *= node_datas[nodes_pair.y].cost if node_datas[nodes_pair.y] != null else 0.0
+		costs_pair.x *= node_datas[nodes_pair.y].cost if node_datas[nodes_pair.y] != null else 0.0
+		costs_pair.y *= node_datas[nodes_pair.x].cost if node_datas[nodes_pair.x] != null else 0.0
 		_costs_dict[nodes_pair] = costs_pair
 		_costs_dict[Vector2(nodes_pair.y, nodes_pair.x)] = Vector2(costs_pair.x, costs_pair.y)
 
@@ -359,10 +371,3 @@ func _connections_changed():
 
 		if costs_pair.y != INF:
 			_node_neighbors[nodes_pair.y].append(nodes_pair.x)
-
-
-func _on_node_gui_input(event : InputEvent, index : int):
-	if node_datas[index] == null:
-		return
-
-	node_gui_input.emit(event, index, node_datas[index])

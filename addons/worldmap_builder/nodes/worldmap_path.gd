@@ -8,9 +8,6 @@ enum PathMode {
 	BEZIER,
 }
 
-## Emitted when a node on this path receives input.
-signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData)
-
 @export_group("Points")
 @export var start := Vector2(INF, INF):
 	set(v):
@@ -76,7 +73,7 @@ func set_distance_between_points(value : float):
 
 
 func get_end_connection_indices() -> Array[int]:
-	return [0, _node_controls.size() - 1]
+	return [0, get_node_count() - 1]
 
 
 func get_end_connection_positions() -> Array[Vector2]:
@@ -119,16 +116,14 @@ func get_connections() -> Array[Vector2i]:
 
 
 func get_node_neighbors(index : int) -> Array[int]:
-	if index == 0:
-		return [index + 1]
+	var result : Array[int] = []
+	if index < get_node_count() - 1:
+		result.append(index + 1)
 
-	if index == node_datas.size() - 1:
-		return [index - 1] if bidirectional else []
+	if bidirectional && index > 0:
+		result.append(index - 1)
 
-	if index < 0 || index >= node_datas.size():
-		return []
-
-	return [index - 1, index + 1] if bidirectional else [index + 1]
+	return result
 
 
 func get_node_data(index : int) -> WorldmapNodeData:
@@ -160,13 +155,13 @@ func _draw():
 		x.hide()
 
 	var prev_pos := Vector2.ZERO
-	for i in node_datas.size() + 1:
+	for i in get_node_count():
 		var cur_pos := _get_node_position_precalc(i, count_points, angle_diff)
 		if is_editor && i != 0:
 			draw_line(prev_pos, cur_pos, Color.ORANGE_RED, 4.0)
 
 		prev_pos = cur_pos
-		if i == 0 || node_datas[i - 1] == null:
+		if i == 0 || node_datas.size() < i || node_datas[i - 1] == null:
 			continue
 
 		var tex := node_datas[i - 1].texture
@@ -186,7 +181,10 @@ func _set(property : StringName, value) -> bool:
 		queue_redraw()
 		while _node_controls.size() < value:
 			var new_control := Control.new()
-			new_control.gui_input.connect(_on_node_gui_input.bind(_node_controls.size()))
+			var control_index := _node_controls.size() + 1
+			new_control.gui_input.connect(_on_node_gui_input.bind(control_index))
+			new_control.mouse_entered.connect(_on_node_mouse_entered.bind(control_index))
+			new_control.mouse_exited.connect(_on_node_mouse_exited.bind(control_index))
 			add_child(new_control)
 			_node_controls.append(new_control)
 
@@ -221,6 +219,9 @@ func _get(property : StringName):
 
 	if property.begins_with("node_"):
 		var name_split := property.trim_prefix("node_").split("/")
+		if name_split.size() != 2:
+			return null
+
 		var index := name_split[0].to_int()
 		match name_split[1]:
 			"data": return node_datas[index]
@@ -293,10 +294,3 @@ func _get_node_position_precalc(index : int, count_points, angle_diff) -> Vector
 
 		_:
 			return Vector2()
-
-
-func _on_node_gui_input(event : InputEvent, index : int):
-	if node_datas[index] == null:
-		return
-
-	node_gui_input.emit(event, index, node_datas[index])

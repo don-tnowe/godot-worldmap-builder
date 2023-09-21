@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://4tmqw8w2u8o5"]
+[gd_scene load_steps=23 format=3 uid="uid://4tmqw8w2u8o5"]
 
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
 [ext_resource type="Texture2D" uid="uid://dfwrk73ka6j8x" path="res://example/skilltree_borders.png" id="2_76jt8"]
@@ -12,6 +12,8 @@
 [ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
 [ext_resource type="Resource" uid="uid://b1t0k6su5o8v" path="res://example/skills/small_mp.tres" id="8_41shr"]
 [ext_resource type="Resource" uid="uid://xy4g21ll2705" path="res://example/skills/small_weapon.tres" id="9_vbyll"]
+[ext_resource type="Script" path="res://example/input_handler.gd" id="13_3q26m"]
+[ext_resource type="Resource" uid="uid://dnpf51y01rqsa" path="res://example/skills/small_ward.tres" id="13_6sgvs"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vql2y"]
 atlas = ExtResource("2_76jt8")
@@ -30,7 +32,7 @@ icon_borders = Array[Texture2D]([SubResource("AtlasTexture_vql2y")])
 straight_tex = SubResource("CompressedTexture2D_w5rdv")
 straight_tex_region = Rect2(0, 8, 128, 8)
 straight_tex_repeat = false
-priority = 10
+priority = -5
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pr8m7"]
 atlas = ExtResource("2_76jt8")
@@ -67,18 +69,24 @@ straight_tex_region = Rect2(0, 0, 128, 8)
 straight_tex_repeat = false
 priority = 0
 
-[node name="Map" type="Control"]
+[node name="Node" type="Node"]
+
+[node name="Map" type="Control" parent="." node_paths=PackedStringArray("initial_item")]
 custom_minimum_size = Vector2(1042.63, 609.388)
 layout_mode = 3
 anchors_preset = 0
+offset_right = 1042.63
+offset_bottom = 609.388
 mouse_filter = 2
 script = ExtResource("1_fafx5")
+initial_item = NodePath("WorldmapGraph")
+initial_node = 6
 style_active = SubResource("Resource_aa6er")
 style_can_activate = SubResource("Resource_4xltf")
 style_inactive = SubResource("Resource_2hquj")
 metadata/_edit_lock_ = true
 
-[node name="Path" type="Node2D" parent="."]
+[node name="Path" type="Node2D" parent="Map"]
 script = ExtResource("2_oyim1")
 start = Vector2(69.8754, 585.219)
 end = Vector2(318.262, 137.505)
@@ -95,7 +103,7 @@ node_5/data = ExtResource("2_xtlsu")
 node_6/data = ExtResource("2_xtlsu")
 node_7/data = ExtResource("5_sdu2a")
 
-[node name="Path2" type="Node2D" parent="."]
+[node name="Path2" type="Node2D" parent="Map"]
 script = ExtResource("2_oyim1")
 start = Vector2(318.262, 137.505)
 end = Vector2(680.768, 285.74)
@@ -103,7 +111,8 @@ handle_1 = Vector2(492, 230)
 handle_2 = Vector2(182.92, 175.825)
 mode = 1
 bidirectional = true
-node_count = 9
+end_with_empty = true
+node_count = 8
 node_0/data = ExtResource("5_fevd2")
 node_1/data = ExtResource("5_fevd2")
 node_2/data = ExtResource("5_fevd2")
@@ -112,9 +121,8 @@ node_4/data = ExtResource("5_fevd2")
 node_5/data = ExtResource("5_fevd2")
 node_6/data = ExtResource("5_fevd2")
 node_7/data = ExtResource("5_fevd2")
-node_8/data = ExtResource("5_fevd2")
 
-[node name="Path3" type="Node2D" parent="."]
+[node name="Path3" type="Node2D" parent="Map"]
 script = ExtResource("2_oyim1")
 start = Vector2(680.768, 285.74)
 end = Vector2(984.077, 572.852)
@@ -133,7 +141,7 @@ node_6/data = ExtResource("6_jp1vb")
 node_7/data = ExtResource("6_jp1vb")
 node_8/data = ExtResource("6_jp1vb")
 
-[node name="Path4" type="Node2D" parent="."]
+[node name="Path4" type="Node2D" parent="Map"]
 script = ExtResource("2_oyim1")
 start = Vector2(984.077, 572.852)
 end = Vector2(1042.63, 121.725)
@@ -152,26 +160,32 @@ node_6/data = ExtResource("4_ytcj4")
 node_7/data = ExtResource("4_ytcj4")
 node_8/data = ExtResource("4_ytcj4")
 
-[node name="WorldmapGraph" type="Node2D" parent="."]
+[node name="WorldmapGraph" type="Node2D" parent="Map"]
 script = ExtResource("7_miljq")
 connection_min_length = 64.0
-end_connection_nodes = Array[int]([6, 4])
-node_count = 7
+end_connection_nodes = Array[int]([4, 8, 9])
+node_count = 10
 node_0/data = ExtResource("8_41shr")
 node_0/position = Vector2(471.517, 365.482)
 node_1/data = ExtResource("8_41shr")
 node_1/position = Vector2(464.025, 306.729)
 node_2/data = ExtResource("8_41shr")
-node_2/position = Vector2(561.068, 373.324)
+node_2/position = Vector2(581.113, 380.214)
 node_3/data = ExtResource("8_41shr")
 node_3/position = Vector2(411.717, 342.51)
-node_4/data = ExtResource("8_41shr")
+node_4/data = ExtResource("5_sdu2a")
 node_4/position = Vector2(456.701, 237.35)
 node_5/data = ExtResource("8_41shr")
 node_5/position = Vector2(513.792, 271.762)
 node_6/data = ExtResource("8_41shr")
 node_6/position = Vector2(519.38, 422.8)
-connection_count = 7
+node_7/data = ExtResource("8_41shr")
+node_7/position = Vector2(610, 317)
+node_8/data = ExtResource("8_41shr")
+node_8/position = Vector2(680.768, 285.74)
+node_9/data = ExtResource("8_41shr")
+node_9/position = Vector2(519.38, 486.8)
+connection_count = 10
 connection_0/nodes = Vector2i(0, 3)
 connection_1/nodes = Vector2i(0, 1)
 connection_2/nodes = Vector2i(1, 5)
@@ -179,8 +193,11 @@ connection_3/nodes = Vector2i(1, 4)
 connection_4/nodes = Vector2i(6, 6)
 connection_5/nodes = Vector2i(6, 0)
 connection_6/nodes = Vector2i(6, 2)
+connection_7/nodes = Vector2i(2, 7)
+connection_8/nodes = Vector2i(7, 8)
+connection_9/nodes = Vector2i(9, 6)
 
-[node name="WorldmapGraph2" type="Node2D" parent="."]
+[node name="WorldmapGraph2" type="Node2D" parent="Map"]
 script = ExtResource("7_miljq")
 connection_min_length = 64.0
 end_connection_nodes = Array[int]([0, 6])
@@ -206,3 +223,88 @@ connection_2/nodes = Vector2i(5, 6)
 connection_3/nodes = Vector2i(0, 1)
 connection_4/nodes = Vector2i(0, 2)
 connection_5/nodes = Vector2i(3, 2)
+
+[node name="WorldmapGraph3" type="Node2D" parent="Map"]
+script = ExtResource("7_miljq")
+connection_min_length = 64.0
+end_connection_nodes = Array[int]([9, 0])
+node_count = 10
+node_0/data = null
+node_0/position = Vector2(680.768, 285.74)
+node_1/data = ExtResource("13_6sgvs")
+node_1/position = Vector2(744.768, 285.74)
+node_2/data = ExtResource("13_6sgvs")
+node_2/position = Vector2(808.768, 285.74)
+node_3/data = ExtResource("13_6sgvs")
+node_3/position = Vector2(872.768, 285.74)
+node_4/data = ExtResource("13_6sgvs")
+node_4/position = Vector2(936.768, 285.74)
+node_5/data = ExtResource("13_6sgvs")
+node_5/position = Vector2(936.768, 221.74)
+node_6/data = ExtResource("13_6sgvs")
+node_6/position = Vector2(954.265, 160.857)
+node_7/data = ExtResource("13_6sgvs")
+node_7/position = Vector2(980.082, 108.102)
+node_8/data = ExtResource("13_6sgvs")
+node_8/position = Vector2(1028.35, 66.5704)
+node_9/data = null
+node_9/position = Vector2(1042.63, 121.725)
+connection_count = 9
+connection_0/nodes = Vector2i(0, 1)
+connection_1/nodes = Vector2i(1, 2)
+connection_2/nodes = Vector2i(2, 3)
+connection_3/nodes = Vector2i(3, 4)
+connection_4/nodes = Vector2i(4, 5)
+connection_5/nodes = Vector2i(5, 6)
+connection_6/nodes = Vector2i(6, 7)
+connection_7/nodes = Vector2i(7, 8)
+connection_8/nodes = Vector2i(8, 9)
+
+[node name="InputHandler" type="Node" parent="." node_paths=PackedStringArray("skilltree", "tooltip_root", "tooltip_title", "tooltip_desc")]
+script = ExtResource("13_3q26m")
+skilltree = NodePath("../Map")
+tooltip_root = NodePath("Tooltip")
+tooltip_title = NodePath("Tooltip/MarginContainer/VBoxContainer/PanelContainer/Label")
+tooltip_desc = NodePath("Tooltip/MarginContainer/VBoxContainer/Label2")
+
+[node name="Tooltip" type="PanelContainer" parent="InputHandler"]
+offset_left = -274.0
+offset_top = -214.0
+offset_right = 78.0
+offset_bottom = -124.0
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="InputHandler/Tooltip"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InputHandler/Tooltip/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="InputHandler/Tooltip/MarginContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="InputHandler/Tooltip/MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+text = "Skill Name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="InputHandler/Tooltip/MarginContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label2" type="Label" parent="InputHandler/Tooltip/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "This skill gives +0.0001% to some useless stat.
+I have this type of skill trees."
+
+[connection signal="node_gui_input" from="Map" to="InputHandler" method="_on_map_node_gui_input"]
+[connection signal="node_mouse_entered" from="Map" to="InputHandler" method="_on_map_node_mouse_entered"]
+[connection signal="node_mouse_exited" from="Map" to="InputHandler" method="_on_map_node_mouse_exited"]
