@@ -50,6 +50,19 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	assert(false, "Method WorldmapViewItem::get_node_data() not implemented!")
 	return null
 
+## Must return the [Rect2] that encloses all nodes.
+func get_clickable_rect() -> Rect2:
+	var result := Rect2(get_node_position(0), Vector2.ZERO)
+	for i in get_node_count():
+		if get_node_data(i) == null:
+			continue
+
+		var tex_half_size := get_node_data(i).texture.get_size() * 0.5
+		result = result.expand(get_node_position(i) + tex_half_size)
+		result = result.expand(get_node_position(i) - tex_half_size)
+
+	return result
+
 
 func _on_node_gui_input(event : InputEvent, index : int):
 	var data_under := get_node_data(index)

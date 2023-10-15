@@ -17,8 +17,17 @@ var button_margin := 4.0
 var edited_object : Object:
 	set(v):
 		edited_object = v
+		if v is WorldmapViewItem:
+			var siblings : Array = v.get_parent().get_children()
+			edited_sibling_rects.resize(siblings.size())
+			for i in siblings.size():
+				edited_sibling_rects[i] = Rect2()
+				if siblings[i] is WorldmapViewItem:
+					edited_sibling_rects[i] = siblings[i].get_clickable_rect()
+
 		plugin.update_overlays()
 
+var edited_sibling_rects : Array[Rect2] = []
 var last_dragging := -1
 var dragging := -1
 var context_menu : Popup
@@ -249,8 +258,22 @@ func _handle_drag(event : InputEventMouseMotion) -> bool:
 
 
 func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
+	var vp_xform := _get_viewport_xform()
+	var handle_input_anyway := false
+	if edited_object is WorldmapViewItem:
+		var click_pos := vp_xform.affine_inverse() * event.position
+		for i in edited_sibling_rects.size():
+			if edited_sibling_rects[i].has_point(click_pos):
+				var clicked_node : Node = edited_object.get_parent().get_child(i)
+				if clicked_node == edited_object:
+					handle_input_anyway = true
+					continue
+
+				plugin.get_editor_interface().edit_node(null)
+				plugin.get_editor_interface().edit_node(clicked_node)
+				return true
+
 	if edited_object is WorldmapGraph:
-		var vp_xform := _get_viewport_xform()
 		var selected_node_pos : Vector2 = edited_object.node_positions[last_dragging]
 		var mouse_pos := event.position
 
@@ -286,7 +309,7 @@ func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
 
 		return false
 
-	return false
+	return handle_input_anyway
 
 
 func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : float) -> Vector2:
