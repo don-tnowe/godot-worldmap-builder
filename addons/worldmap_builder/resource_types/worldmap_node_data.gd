@@ -19,6 +19,8 @@ extends Resource
 @export var cost := 1
 ## Node tags. Used by developer.
 @export var tags : Array[StringName]
+## Node's extra data. Used by developer.
+@export var data : Array[Resource]
 
 
 func _to_string() -> String:

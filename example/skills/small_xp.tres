@@ -1,7 +1,13 @@
-[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=4 format=3 uid="uid://dqwiht23gapri"]
+[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=6 format=3 uid="uid://dqwiht23gapri"]
 
 [ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_0ejan"]
+[ext_resource type="Script" path="res://example/skill_stats.gd" id="1_o8hv7"]
 [ext_resource type="Texture2D" uid="uid://cji2hjb30pjt0" path="res://example/skill_icons1.png" id="2_tmagr"]
+
+[sub_resource type="Resource" id="Resource_086by"]
+script = ExtResource("1_o8hv7")
+name = &"xp_from_kills"
+amount = 4.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_txrhh"]
 atlas = ExtResource("2_tmagr")
@@ -17,3 +23,4 @@ desc = "+4% Experience from Kills"
 size_tier = 0
 cost = 1
 tags = Array[StringName]([&"small", &"experience", &"rewards"])
+data = Array[Resource]([SubResource("Resource_086by")])

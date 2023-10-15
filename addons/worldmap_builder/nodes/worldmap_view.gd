@@ -95,12 +95,7 @@ func _ready():
 	if !is_instance_valid(initial_item):
 		initial_item = get_child(0)
 
-	var initial_array := []
-	initial_array.resize(initial_item.get_node_count())
-	initial_array.fill(0)
-	initial_array[initial_node] = initial_node_value
-	recalculate_map()
-	load_state({get_path_to(initial_item) : initial_array})
+	reset()
 
 
 func _draw():
@@ -168,6 +163,15 @@ func _draw():
 		var cur_styles : Array[WorldmapStyle] = node_styles[i]
 		for j in cur_positions.size():
 			cur_styles[j].draw_node(self, cur_datas[j], cur_positions[j] - full_map_rect.position)
+
+## Resets all unlocks, leaving just the starting node.
+func reset():
+	var initial_array := []
+	initial_array.resize(initial_item.get_node_count())
+	initial_array.fill(0)
+	initial_array[initial_node] = initial_node_value
+	recalculate_map()
+	load_state({get_path_to(initial_item) : initial_array})
 
 ## Looks through all child [WorldmapViewItem]s and builds a graph. Overlapping connectable points on different items are considered connected.[br]
 ## [b]Warning: [/b] this is called on ready, and must be called again when the map changes.
@@ -267,7 +271,26 @@ func get_node_data(item : NodePath, node : int) -> WorldmapNodeData:
 func can_activate(item : NodePath, node : int) -> bool:
 	return _worldmap_can_activate[item][node]
 
-## Load the state of the entire map. [br]
+## For each [WorldmapNodeData] in the graph, returns its [method get_node_state]. Duplicate resources will have their numbers summed up.
+func get_all_nodes() -> Dictionary:
+	var result := {}
+	var state_keys := _worldmap_state.keys()
+	var state_values := _worldmap_state.values()
+	for i in state_keys.size():
+		var cur_view_item : NodePath = state_keys[i]
+		var cur_view_values : Array = state_values[i]
+		for j in cur_view_values.size():
+			var cur_data := get_node_data(cur_view_item, j)
+			result[cur_data] = result.get(cur_data, 0) + cur_view_values[j]
+
+	result.erase(null)  # From connector nodes
+	return result
+
+## Returns the state of the entire map, to be loaded with [method load_state]. [br]
+func get_state() -> Dictionary:
+	return _worldmap_state.duplicate(true)
+
+## Load the state of the entire map, in a format saved with [method get_state]. [br]
 ## The supplied dictionary must contain Strings or NodePaths as keys, and int Arrays as values corresponding to levels of the activated.
 func load_state(state : Dictionary):
 	# --- TODO ---

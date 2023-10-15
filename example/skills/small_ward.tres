@@ -1,7 +1,13 @@
-[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=4 format=3 uid="uid://dnpf51y01rqsa"]
+[gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=6 format=3 uid="uid://dnpf51y01rqsa"]
 
+[ext_resource type="Script" path="res://example/skill_stats.gd" id="1_nhxf0"]
 [ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_nr5h5"]
 [ext_resource type="Texture2D" uid="uid://cji2hjb30pjt0" path="res://example/skill_icons1.png" id="2_accig"]
+
+[sub_resource type="Resource" id="Resource_c86ou"]
+script = ExtResource("1_nhxf0")
+name = &"ward"
+amount = 12.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_txrhh"]
 atlas = ExtResource("2_accig")
@@ -18,3 +24,4 @@ Ward is depleted before Health, and regenerates quickly"
 size_tier = 0
 cost = 1
 tags = Array[StringName]([&"small", &"ward", &"defensive", &"magic"])
+data = Array[Resource]([SubResource("Resource_c86ou")])
