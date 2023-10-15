@@ -22,8 +22,8 @@ resources_spreadsheet_view/context_menu_on_leftclick=false
 
 config/name="Addon: WorldMap Builder"
 run/main_scene="res://example/example.tscn"
-config/features=PackedStringArray("4.1", "GL Compatibility")
-config/icon="res://icon.svg"
+config/features=PackedStringArray("4.2", "GL Compatibility")
+config/icon="res://icon.png"
 
 [editor_plugins]
 
