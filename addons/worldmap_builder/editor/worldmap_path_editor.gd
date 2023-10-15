@@ -56,95 +56,110 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 				overlay.draw_line(markers[1], markers[3], draw_line_color, draw_line_size)
 
 	if edited_object is WorldmapGraph:
-		var pos_arr : Array = edited_object.node_positions
-		var selected_node_pos := markers[last_dragging]
-		var add_node_distance : float = edited_object.connection_min_length
-		if add_node_distance <= 0.0:
-			add_node_distance = 32.0
-
-		# --- Add Node ring
-
-		var selected_node_radius := vp_xform.get_scale().x * add_node_distance
-		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.05, PI * 0.45, 8, draw_line_color, draw_line_size)
-		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.55, PI * 0.95, 8, draw_line_color, draw_line_size)
-		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.05, PI * 1.45, 8, draw_line_color, draw_line_size)
-		overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.55, PI * 1.95, 8, draw_line_color, draw_line_size)
-
-		# --- Connection lines
-
-		var connections_with_selected : Array[bool] = []
-		connections_with_selected.resize(markers.size())
-		connections_with_selected.fill(false)
-		for i in edited_object.connection_nodes.size():
-			var connection : Vector2i = edited_object.connection_nodes[i]
-
-			if connection.x == last_dragging:
-				connections_with_selected[connection.y] = true
-
-			if connection.y == last_dragging:
-				connections_with_selected[connection.x] = true
-
-			var connection_start : Vector2 = pos_arr[connection.x]
-			var connection_vec : Vector2 = pos_arr[connection.y] - connection_start
-			var connection_costs : Vector2 = edited_object.connection_costs[i]
-			var poly_pt_offset := Vector2(-connection_vec.y, connection_vec.x).normalized() * draw_line_size * 0.5
-
-			var c1 := draw_line_color
-			var c2 := draw_line_color
-
-			if connection_costs.x == INF:
-				c1.a = 0.0
-				connection_costs.x = connection_costs.y
-
-			if connection_costs.y == INF:
-				c2.a = 0.0
-				connection_costs.y = connection_costs.x
-
-			overlay.draw_polygon([
-				vp_xform * (connection_start) + poly_pt_offset * maxf(connection_costs.x, 1.0),
-				vp_xform * (connection_start) - poly_pt_offset * maxf(connection_costs.x, 1.0),
-				vp_xform * (connection_start + connection_vec) - poly_pt_offset * maxf(connection_costs.y, 1.0),
-				vp_xform * (connection_start + connection_vec) + poly_pt_offset * maxf(connection_costs.y, 1.0),
-			], [
-				c1, c1, c2, c2,
-			])
-
-		# --- Checkboxes for connections
-
-		var checkbox_size := draw_marker_checkbox_checked.get_size()
-		for i in markers.size():
-			if i == last_dragging:
-				continue
-
-			var tex := draw_marker_checkbox_checked if connections_with_selected[i] else draw_marker_checkbox_unchecked
-			overlay.draw_texture(tex, markers[i].move_toward(markers[last_dragging], checkbox_size.x + checkbox_size.y) - checkbox_size * 0.5)
-
-		# --- Add Node ring: add position marker
-
-		var add_icon_size := draw_marker_add.get_size()
-		var mouse_pos := overlay.get_local_mouse_position()
-		if _is_within_ring(mouse_pos, selected_node_pos, selected_node_radius, add_icon_size.x):
-			var snapped_angle := snappedf((mouse_pos - selected_node_pos).angle(), deg_to_rad(snap_angle))
-			var snapped_offset := Vector2(selected_node_radius * cos(snapped_angle), selected_node_radius * sin(snapped_angle))
-			overlay.draw_texture(draw_marker_add, selected_node_pos + snapped_offset - add_icon_size * 0.5)
-
-		# --- Node index label
-
-		var font := overlay.get_theme_font("Font", "EditorFonts")
-		var fontsize := overlay.get_theme_font_size("Font", "EditorFonts")
-		var node_index_string := str(last_dragging)
-		var index_label_size := font.get_string_size(node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
-		var index_label_offset := Vector2(-index_label_size.x * 0.5, -index_label_size.y - 0.5 * draw_marker.get_size().y)
-		overlay.draw_string_outline(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize, 4, Color.BLACK)
-		overlay.draw_string(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
+		_draw_graph(overlay, vp_xform, markers)
 
 	var marker_size := draw_marker.get_size()
-	for i in markers.size():
-		overlay.draw_texture(draw_marker, markers[i] - marker_size * 0.5)
 
 	if edited_object is WorldmapGraph:
+		for i in markers.size():
+			overlay.draw_texture(draw_marker, markers[i] - marker_size * 0.5)
+
 		for x in edited_object.end_connection_nodes:
 			overlay.draw_texture(draw_marker, vp_xform * edited_object.node_positions[x] - marker_size * 0.5, draw_connection_end_color)
+
+	if edited_object is WorldmapPath:
+		overlay.draw_texture(draw_marker, markers[0] - marker_size * 0.5, draw_connection_end_color)
+		overlay.draw_texture(draw_marker, markers[1] - marker_size * 0.5, draw_connection_end_color)
+		match edited_object.mode:
+			1:
+				overlay.draw_texture(draw_marker, markers[2] - marker_size * 0.5)
+			2:
+				overlay.draw_texture(draw_marker, markers[2] - marker_size * 0.5)
+				overlay.draw_texture(draw_marker, markers[3] - marker_size * 0.5)
+
+
+func _draw_graph(overlay : Control, vp_xform : Transform2D, markers : Array[Vector2]):
+	var pos_arr : Array = edited_object.node_positions
+	var selected_node_pos := markers[last_dragging]
+	var add_node_distance : float = edited_object.connection_min_length
+	if add_node_distance <= 0.0:
+		add_node_distance = 32.0
+
+	# --- Add Node ring
+
+	var selected_node_radius := vp_xform.get_scale().x * add_node_distance
+	overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.05, PI * 0.45, 8, draw_line_color, draw_line_size)
+	overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 0.55, PI * 0.95, 8, draw_line_color, draw_line_size)
+	overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.05, PI * 1.45, 8, draw_line_color, draw_line_size)
+	overlay.draw_arc(selected_node_pos, selected_node_radius, PI * 1.55, PI * 1.95, 8, draw_line_color, draw_line_size)
+
+	# --- Connection lines
+
+	var connections_with_selected : Array[bool] = []
+	connections_with_selected.resize(markers.size())
+	connections_with_selected.fill(false)
+	for i in edited_object.connection_nodes.size():
+		var connection : Vector2i = edited_object.connection_nodes[i]
+
+		if connection.x == last_dragging:
+			connections_with_selected[connection.y] = true
+
+		if connection.y == last_dragging:
+			connections_with_selected[connection.x] = true
+
+		var connection_start : Vector2 = pos_arr[connection.x]
+		var connection_vec : Vector2 = pos_arr[connection.y] - connection_start
+		var connection_costs : Vector2 = edited_object.connection_costs[i]
+		var poly_pt_offset := Vector2(-connection_vec.y, connection_vec.x).normalized() * draw_line_size * 0.5
+
+		var c1 := draw_line_color
+		var c2 := draw_line_color
+
+		if connection_costs.x == INF:
+			c1.a = 0.0
+			connection_costs.x = connection_costs.y
+
+		if connection_costs.y == INF:
+			c2.a = 0.0
+			connection_costs.y = connection_costs.x
+
+		overlay.draw_polygon([
+			vp_xform * (connection_start) + poly_pt_offset * maxf(connection_costs.x, 1.0),
+			vp_xform * (connection_start) - poly_pt_offset * maxf(connection_costs.x, 1.0),
+			vp_xform * (connection_start + connection_vec) - poly_pt_offset * maxf(connection_costs.y, 1.0),
+			vp_xform * (connection_start + connection_vec) + poly_pt_offset * maxf(connection_costs.y, 1.0),
+		], [
+			c1, c1, c2, c2,
+		])
+
+	# --- Checkboxes for connections
+
+	var checkbox_size := draw_marker_checkbox_checked.get_size()
+	for i in markers.size():
+		if i == last_dragging:
+			continue
+
+		var tex := draw_marker_checkbox_checked if connections_with_selected[i] else draw_marker_checkbox_unchecked
+		overlay.draw_texture(tex, markers[i].move_toward(markers[last_dragging], checkbox_size.x + checkbox_size.y) - checkbox_size * 0.5)
+
+	# --- Add Node ring: add position marker
+
+	var add_icon_size := draw_marker_add.get_size()
+	var mouse_pos := overlay.get_local_mouse_position()
+	if _is_within_ring(mouse_pos, selected_node_pos, selected_node_radius, add_icon_size.x):
+		var snapped_angle := snappedf((mouse_pos - selected_node_pos).angle(), deg_to_rad(snap_angle))
+		var snapped_offset := Vector2(selected_node_radius * cos(snapped_angle), selected_node_radius * sin(snapped_angle))
+		overlay.draw_texture(draw_marker_add, selected_node_pos + snapped_offset - add_icon_size * 0.5)
+
+	# --- Node index label
+
+	var font := overlay.get_theme_font("Font", "EditorFonts")
+	var fontsize := overlay.get_theme_font_size("Font", "EditorFonts")
+	var node_index_string := str(last_dragging)
+	var index_label_size := font.get_string_size(node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
+	var index_label_offset := Vector2(-index_label_size.x * 0.5, -index_label_size.y - 0.5 * draw_marker.get_size().y)
+	overlay.draw_string_outline(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize, 4, Color.BLACK)
+	overlay.draw_string(font, selected_node_pos + index_label_offset, node_index_string, HORIZONTAL_ALIGNMENT_CENTER, -1, fontsize)
 
 
 func _forward_canvas_gui_input(event : InputEvent) -> bool:

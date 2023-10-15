@@ -22,6 +22,7 @@ enum ConnectionMode {
 					connection_costs[i] = Vector2(1, INF)
 
 		notify_property_list_changed()
+## Length of new connections, if a node is added by clicking on the white ring around the selected node.
 @export var connection_min_length := 0.0
 ## Nodes on this graph that can connect with overlapping [WorldmapViewItem]s, and act as snapping targets. [br]
 ## If the plugin is enabled, you can right-click a node to change this. Such nodes are shown as yellow.

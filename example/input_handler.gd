@@ -31,6 +31,9 @@ func _skillpoints_changed():
 		var v : int = stats_raw[k]
 		if v == 0: continue
 		for node_data_item in k.data:
+			# [SkillStats] is a resource specific to this example.
+			# You can search for your own resource types,
+			# or if you're using Wyvernshield, you can store stats in [StatModification]s.
 			if node_data_item is SkillStats:
 				stats[node_data_item.name] = stats.get(node_data_item.name, 0) + v * node_data_item.amount
 

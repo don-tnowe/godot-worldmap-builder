@@ -81,7 +81,6 @@ mouse_filter = 2
 script = ExtResource("1_fafx5")
 initial_item = NodePath("WorldmapGraph")
 initial_node = 6
-duplicate_stat_path = null
 style_active = SubResource("Resource_aa6er")
 style_can_activate = SubResource("Resource_4xltf")
 style_inactive = SubResource("Resource_2hquj")
