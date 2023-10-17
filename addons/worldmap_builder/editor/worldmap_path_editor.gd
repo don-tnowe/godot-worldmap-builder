@@ -244,7 +244,7 @@ func _handle_drag(event : InputEventMouseMotion) -> bool:
 		property = "node_%d/position" % dragging
 
 	var old_value := edited_object.get(property)
-	var target_value : Vector2 = vp_xform.affine_inverse() * event.position
+	var target_value : Vector2 = vp_xform.affine_inverse() * event.position - edited_object.global_position
 	if !event.ctrl_pressed:
 		var snap_targets : Array = edited_object.get_parent().get_children()
 		var snap_distance_squared := draw_marker.get_size().x * 0.5
