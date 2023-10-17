@@ -109,7 +109,9 @@ func _draw():
 	var node_styles : Array[Array] = []
 
 	var children := get_children()
-	var full_map_rect := Rect2(position, size)
+	if children.size() == 0: return
+
+	var full_map_rect := Rect2(children[0].get_node_position(0), Vector2.ZERO)
 	node_positions.resize(children.size())
 	node_datas.resize(children.size())
 	node_styles.resize(children.size())
@@ -118,8 +120,7 @@ func _draw():
 		for j in cur_child.get_node_count():
 			full_map_rect = full_map_rect.expand(cur_child.get_node_position(j))
 
-	custom_minimum_size = full_map_rect.size
-	position = full_map_rect.position
+	custom_minimum_size = full_map_rect.size + full_map_rect.position * 2
 	for i in children.size():
 		var x := children[i]
 		var cur_positions : Array[Vector2] = []
@@ -139,7 +140,7 @@ func _draw():
 		cur_datas.resize(x_node_count)
 		cur_styles.resize(x_node_count)
 		for j in x_node_count:
-			cur_positions[j] = x.get_node_position(j) - full_map_rect.position
+			cur_positions[j] = x.get_node_position(j)
 			cur_datas[j] = x.get_node_data(j)
 
 			if cur_item_activatable[j]:
@@ -162,7 +163,7 @@ func _draw():
 		var cur_datas : Array[WorldmapNodeData] = node_datas[i]
 		var cur_styles : Array[WorldmapStyle] = node_styles[i]
 		for j in cur_positions.size():
-			cur_styles[j].draw_node(self, cur_datas[j], cur_positions[j] - full_map_rect.position)
+			cur_styles[j].draw_node(self, cur_datas[j], cur_positions[j])
 
 ## Resets all unlocks, leaving just the starting node.
 func reset():

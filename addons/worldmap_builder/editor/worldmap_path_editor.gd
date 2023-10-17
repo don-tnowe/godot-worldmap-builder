@@ -74,7 +74,7 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 			overlay.draw_texture(draw_marker, markers[i] - marker_size * 0.5)
 
 		for x in edited_object.end_connection_nodes:
-			overlay.draw_texture(draw_marker, vp_xform * edited_object.node_positions[x] - marker_size * 0.5, draw_connection_end_color)
+			overlay.draw_texture(draw_marker, vp_xform * (edited_object.node_positions[x] + edited_object.global_position) - marker_size * 0.5, draw_connection_end_color)
 
 	if edited_object is WorldmapPath:
 		overlay.draw_texture(draw_marker, markers[0] - marker_size * 0.5, draw_connection_end_color)
@@ -88,7 +88,10 @@ func _forward_canvas_draw_over_viewport(overlay : Control):
 
 
 func _draw_graph(overlay : Control, vp_xform : Transform2D, markers : Array[Vector2]):
-	var pos_arr : Array = edited_object.node_positions
+	var pos_arr : Array = edited_object.node_positions.duplicate()
+	for i in pos_arr.size():
+		pos_arr[i] += edited_object.global_position
+
 	var selected_node_pos := markers[last_dragging]
 	var add_node_distance : float = edited_object.connection_min_length
 	if add_node_distance <= 0.0:
@@ -413,17 +416,17 @@ func _get_marker_positions() -> Array[Vector2]:
 	var result : Array[Vector2] = []
 	var xform : Transform2D = _get_viewport_xform()
 	if edited_object is WorldmapPath:
-		result.append(xform * edited_object.start)
-		result.append(xform * edited_object.end)
+		result.append(xform * (edited_object.start + edited_object.global_position))
+		result.append(xform * (edited_object.end + edited_object.global_position))
 		if edited_object.mode == WorldmapPath.PathMode.ARC:
-			result.append(xform * edited_object.handle_1)
+			result.append(xform * (edited_object.handle_1 + edited_object.global_position))
 
 		if edited_object.mode == WorldmapPath.PathMode.BEZIER:
-			result.append(xform * edited_object.handle_1)
-			result.append(xform * edited_object.handle_2)
+			result.append(xform * (edited_object.handle_1 + edited_object.global_position))
+			result.append(xform * (edited_object.handle_2 + edited_object.global_position))
 
 	if edited_object is WorldmapGraph:
 		for x in edited_object.node_positions:
-			result.append(xform * x)
+			result.append(xform * (x + edited_object.global_position))
 
 	return result
