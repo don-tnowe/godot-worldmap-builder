@@ -112,6 +112,8 @@ func _draw():
 
 	if auto_minsize:
 		var full_map_rect := get_node_minimum_rect()
+		full_map_rect.position = full_map_rect.position.floor()
+		full_map_rect.size = full_map_rect.size.ceil()
 
 		if full_map_rect.position.x != 0.0:
 			for x in children:
