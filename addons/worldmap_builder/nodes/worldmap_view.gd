@@ -110,9 +110,10 @@ func _draw():
 	if children.size() == 0:
 		return
 
-	var full_map_rect := get_node_minimum_rect()
+	if auto_minsize:
+		var full_map_rect := get_node_minimum_rect()
 
-	custom_minimum_size = full_map_rect.size + full_map_rect.position * 2
+		custom_minimum_size = full_map_rect.size + full_map_rect.position * 2
 
 	if Engine.is_editor_hint() && !editor_preview: return
 	if _worldmap_can_activate.size() == 0: return
