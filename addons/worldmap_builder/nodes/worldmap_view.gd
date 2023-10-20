@@ -191,7 +191,7 @@ func get_node_minimum_rect() -> Rect2:
 			continue
 
 		if !first_found:
-			full_map_rect.position = get_child(0).get_node_position(0)
+			full_map_rect.position = x.get_node_position(0)
 			first_found = true
 
 		for j in x.get_node_count():
