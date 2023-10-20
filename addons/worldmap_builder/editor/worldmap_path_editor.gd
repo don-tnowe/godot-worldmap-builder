@@ -201,6 +201,7 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 				plugin.get_undo_redo().add_undo_property(edited_object, &"position", edited_object.position)
 				plugin.get_undo_redo().add_do_property(edited_object, &"position", edited_object.position)
 				plugin.get_undo_redo().commit_action(true)
+				edited_object.get_parent().queue_redraw()
 
 			return false
 
