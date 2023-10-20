@@ -118,6 +118,7 @@ func _draw():
 				if x is WorldmapViewItem:
 					x.offset_all_nodes(Vector2(-full_map_rect.position.x, 0.0))
 
+			position.x += full_map_rect.position.x
 			full_map_rect.position.x = 0
 
 		if full_map_rect.position.y != 0.0:
@@ -125,9 +126,11 @@ func _draw():
 				if x is WorldmapViewItem:
 					x.offset_all_nodes(Vector2(0.0, -full_map_rect.position.y))
 
+			position.y += full_map_rect.position.y
 			full_map_rect.position.y = 0
 
-		custom_minimum_size = full_map_rect.size + full_map_rect.position * 2
+		custom_minimum_size = full_map_rect.size
+		size = custom_minimum_size
 
 	if Engine.is_editor_hint() && !editor_preview: return
 	if _worldmap_can_activate.size() == 0: return
