@@ -50,6 +50,10 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	assert(false, "Method WorldmapViewItem::get_node_data() not implemented!")
 	return null
 
+## Abstract method. Must offset all nodes by a vector.
+func offset_all_nodes(offset : Vector2):
+	assert(false, "Method WorldmapViewItem::offset_all_nodes() not implemented!")
+
 ## Must return the [Rect2] that encloses all nodes.
 func get_clickable_rect() -> Rect2:
 	var result := Rect2(get_node_position(0), Vector2.ZERO)

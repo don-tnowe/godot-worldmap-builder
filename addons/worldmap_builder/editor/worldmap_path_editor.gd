@@ -11,7 +11,7 @@ var draw_marker : Texture2D
 var draw_marker_add : Texture2D
 var draw_marker_checkbox_checked : Texture2D
 var draw_marker_checkbox_unchecked : Texture2D
-var snap_angle := 5.0
+var snap_angle := 15.0
 var button_margin := 4.0
 
 var edited_object : Object:

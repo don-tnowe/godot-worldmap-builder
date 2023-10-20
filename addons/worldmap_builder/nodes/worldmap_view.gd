@@ -113,6 +113,20 @@ func _draw():
 	if auto_minsize:
 		var full_map_rect := get_node_minimum_rect()
 
+		if full_map_rect.position.x != 0.0:
+			for x in children:
+				if x is WorldmapViewItem:
+					x.offset_all_nodes(Vector2(-full_map_rect.position.x, 0.0))
+
+			full_map_rect.position.x = 0
+
+		if full_map_rect.position.y != 0.0:
+			for x in children:
+				if x is WorldmapViewItem:
+					x.offset_all_nodes(Vector2(0.0, -full_map_rect.position.y))
+
+			full_map_rect.position.y = 0
+
 		custom_minimum_size = full_map_rect.size + full_map_rect.position * 2
 
 	if Engine.is_editor_hint() && !editor_preview: return

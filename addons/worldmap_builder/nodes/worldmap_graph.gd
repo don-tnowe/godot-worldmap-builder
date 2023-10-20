@@ -161,11 +161,16 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	return node_datas[index]
 
 
+func offset_all_nodes(offset : Vector2):
+	for i in node_positions.size():
+		node_positions[i] += offset
+
+	queue_redraw()
+
+
 func _enter_tree():
 	if position != Vector2.ZERO:
-		for i in node_positions.size():
-			node_positions[i] += position
-
+		offset_all_nodes(position)
 		position = Vector2.ZERO
 
 

@@ -133,6 +133,13 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	return node_datas[index - 1]
 
 
+func offset_all_nodes(offset : Vector2):
+	start += offset
+	end += offset
+	handle_1 += offset
+	handle_2 += offset
+
+
 func _enter_tree():
 	if end.x == INF:
 		end = start + Vector2(64.0, 0.0)
@@ -140,10 +147,7 @@ func _enter_tree():
 		handle_2 = end + Vector2(0.0, 0.0)
 
 	if position != Vector2.ZERO:
-		start += position
-		end += position
-		handle_1 += position
-		if mode != PathMode.BEZIER: handle_2 += position
+		offset_all_nodes(position)
 		position = Vector2.ZERO
 
 
