@@ -328,11 +328,17 @@ func _get_snap(snap_targets : Array, pos : Vector2, snap_distance_squared : floa
 
 				continue
 
-			if x.start.distance_squared_to(pos) < snap_distance_squared:
-				return x.start
+			if x.snap_to_all:
+				for i in x.get_node_count():
+					if x.get_node_position(i).distance_squared_to(pos) < snap_distance_squared:
+						return x.get_node_position(i)
 
-			if x.end.distance_squared_to(pos) < snap_distance_squared:
-				return x.end
+			else:
+				if x.start.distance_squared_to(pos) < snap_distance_squared:
+					return x.start
+
+				if x.end.distance_squared_to(pos) < snap_distance_squared:
+					return x.end
 
 		elif x is WorldmapGraph:
 			if x == edited_object:

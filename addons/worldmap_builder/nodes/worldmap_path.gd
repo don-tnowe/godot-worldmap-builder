@@ -27,6 +27,9 @@ enum PathMode {
 		queue_redraw()
 
 @export_group("Path")
+## If [code]true[/code], dragging points of other [WorldmapViewItem]s in the editor makes points snap to all of this item's nodes, not just to ends. [br]
+## [b]Note:[/b] when using [method WorldmapView.can_connect] and similar methods, they will still not be considered connected.
+@export var snap_to_all := false
 @export var mode : PathMode:
 	set(v):
 		mode = v
