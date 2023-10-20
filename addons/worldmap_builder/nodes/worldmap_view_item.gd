@@ -54,11 +54,11 @@ func get_node_data(index : int) -> WorldmapNodeData:
 func offset_all_nodes(offset : Vector2):
 	assert(false, "Method WorldmapViewItem::offset_all_nodes() not implemented!")
 
-## Must return the [Rect2] that encloses all nodes.
+## Must return the [Rect2] that encloses all worldmap nodes on this node, relative to this node's origin position.
 func get_clickable_rect() -> Rect2:
 	var result := Rect2(get_node_position(0), Vector2.ZERO)
 	for i in get_node_count():
-		if get_node_data(i) == null:
+		if get_node_data(i) == null || get_node_data(i).texture == null:
 			continue
 
 		var tex_half_size := get_node_data(i).texture.get_size() * 0.5

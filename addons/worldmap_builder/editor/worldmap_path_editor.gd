@@ -24,6 +24,7 @@ var edited_object : Object:
 				edited_sibling_rects[i] = Rect2()
 				if siblings[i] is WorldmapViewItem:
 					edited_sibling_rects[i] = siblings[i].get_clickable_rect()
+					edited_sibling_rects[i].position += siblings[i].position
 
 		plugin.update_overlays()
 
@@ -264,33 +265,21 @@ func _handle_drag(event : InputEventMouseMotion) -> bool:
 func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
 	var vp_xform := _get_viewport_xform()
 	var handle_input_anyway := false
-	if edited_object is WorldmapViewItem:
-		var click_pos := vp_xform.affine_inverse() * event.position
-		for i in edited_sibling_rects.size():
-			if edited_sibling_rects[i].has_point(click_pos):
-				var clicked_node : Node = edited_object.get_parent().get_child(i)
-				if clicked_node == edited_object:
-					handle_input_anyway = true
-					continue
-
-				plugin.get_editor_interface().edit_node(null)
-				plugin.get_editor_interface().edit_node(clicked_node)
-				return true
 
 	if edited_object is WorldmapGraph:
 		var selected_node_pos : Vector2 = edited_object.node_positions[last_dragging]
+		var selected_node_pos_onscreen : Vector2 = vp_xform * (selected_node_pos + edited_object.global_position)
 		var mouse_pos := event.position
 
 		# --- Add Connection checkboxes
 
 		var checkbox_size := draw_marker_checkbox_checked.get_size() + Vector2.ONE * (button_margin + button_margin)
 		var checkbox_offset := checkbox_size.x + checkbox_size.y - button_margin * 4.0
-		var selected_node_pos_onscreen := vp_xform * selected_node_pos
 		for i in edited_object.node_positions.size():
 			if i == last_dragging:
 				continue
 
-			var checkbox_origin : Vector2 = (vp_xform * edited_object.node_positions[i]).move_toward(selected_node_pos_onscreen, checkbox_offset)
+			var checkbox_origin : Vector2 = (vp_xform * (edited_object.node_positions[i] + edited_object.global_position)).move_toward(selected_node_pos_onscreen, checkbox_offset)
 			if Rect2(checkbox_origin - checkbox_size * 0.5, checkbox_size).has_point(mouse_pos):
 				edited_object.set_connected(last_dragging, i, !edited_object.connection_exists(last_dragging, i))
 				plugin.update_overlays()
@@ -311,7 +300,20 @@ func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
 			plugin.update_overlays()
 			return true
 
-		return false
+	# --- Clicking on other graph items
+
+	if edited_object is WorldmapViewItem:
+		var click_pos : Vector2 = vp_xform.affine_inverse() * event.position - edited_object.global_position
+		for i in edited_sibling_rects.size():
+			if edited_sibling_rects[i].has_point(click_pos):
+				var clicked_node : Node = edited_object.get_parent().get_child(i)
+				if clicked_node == edited_object:
+					handle_input_anyway = true
+					continue
+
+				plugin.get_editor_interface().edit_node(null)
+				plugin.get_editor_interface().edit_node(clicked_node)
+				return true
 
 	return handle_input_anyway
 
