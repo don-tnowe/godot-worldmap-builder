@@ -365,6 +365,21 @@ func load_state(state : Dictionary):
 	_update_activatable()
 
 
+func view_item_node_added(node : WorldmapViewItem, index : int):
+	var node_path := get_path_to(node)
+	_worldmap_can_activate[node_path].insert(index, false)
+	_worldmap_state[node_path].insert(index, 0.0)
+	recalculate_map()
+	queue_redraw()
+
+
+func view_item_node_removed(node : WorldmapViewItem, index : int):
+	var node_path := get_path_to(node)
+	_worldmap_can_activate[node_path].remove_at(index)
+	_worldmap_state[node_path].remove_at(index)
+	queue_redraw()
+
+
 func _update_activatable():
 	if _updating_activatable: return
 	_updating_activatable = true

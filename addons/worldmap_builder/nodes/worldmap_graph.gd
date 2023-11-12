@@ -48,12 +48,17 @@ func _ready():
 
 ## Adds a node at [code]pos[/code] and connects it to [code]parent_node[/code]. [br]
 ## [member node_datas] is copied from the parent.
-func add_node(pos : Vector2, parent_node : int):
-	node_datas.append(node_datas[parent_node])
+func add_node(pos : Vector2, parent_node : int, node_data : WorldmapNodeData = null) -> int:
+	if node_data == null:
+		node_data = node_datas[parent_node]
+
+	node_datas.append(node_data)
 	node_positions.append(pos)
 	set_connected(parent_node, node_datas.size() - 1, true)
 	_add_new_node_control()
 	queue_redraw()
+	get_parent().view_item_node_added(self, node_datas.size() - 1)
+	return node_datas.size() - 1
 
 ## Removes a node, along with all of its connections.[br]
 func remove_node(index : int):
@@ -77,6 +82,7 @@ func remove_node(index : int):
 		i += 1
 
 	set(&"connection_count", connection_nodes.size())
+	get_parent().view_item_node_removed(self, index)
 	queue_redraw()
 
 ## Makes nodes with the specified indices connected or disconnected. Will remove both directions.

@@ -277,7 +277,7 @@ connection_6/nodes = Vector2i(6, 7)
 connection_7/nodes = Vector2i(7, 8)
 connection_8/nodes = Vector2i(8, 9)
 
-[node name="InputHandler" type="Node" parent="." node_paths=PackedStringArray("skilltree", "skillpoint_label", "skill_reset", "stat_list", "tooltip_root", "tooltip_title", "tooltip_desc")]
+[node name="InputHandler" type="Node" parent="." node_paths=PackedStringArray("skilltree", "skillpoint_label", "skill_reset", "stat_list", "tooltip_root", "tooltip_title", "tooltip_desc", "add_target")]
 script = ExtResource("13_3q26m")
 skilltree = NodePath("../MarginContainer/ActualMarginContainer/Map")
 skillpoint_label = NodePath("Anchors/BottomBox/Panel/Points")
@@ -286,6 +286,7 @@ stat_list = NodePath("Anchors/BottomRightBox/Box/Panel/Box/Stats")
 tooltip_root = NodePath("Tooltip")
 tooltip_title = NodePath("Tooltip/MarginContainer/VBoxContainer/PanelContainer/Label")
 tooltip_desc = NodePath("Tooltip/MarginContainer/VBoxContainer/Label2")
+add_target = NodePath("../MarginContainer/ActualMarginContainer/Map/WorldmapGraph")
 
 [node name="Tooltip" type="PanelContainer" parent="InputHandler"]
 offset_left = -274.0
@@ -338,6 +339,12 @@ metadata/_edit_lock_ = true
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
+
+[node name="Label" type="Label" parent="InputHandler/Anchors/BottomBox"]
+self_modulate = Color(1, 1, 1, 0.498039)
+layout_mode = 2
+text = "Left-click to assign. Middle-click to edit"
+horizontal_alignment = 1
 
 [node name="Panel" type="PanelContainer" parent="InputHandler/Anchors/BottomBox"]
 layout_mode = 2

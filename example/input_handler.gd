@@ -14,6 +14,10 @@ extends Node
 @export var tooltip_title : Label
 @export var tooltip_desc : Label
 
+@export_group("Adding Nodes")
+@export var add_target : WorldmapGraph
+@export var add_node_index := 3
+
 
 func _ready():
 	skilltree.max_unlock_cost = starting_skillpoints
@@ -53,6 +57,15 @@ func _on_map_node_gui_input(event : InputEvent, path : NodePath, node_in_path : 
 				tooltip_root.hide()
 				skilltree.max_unlock_cost -= skilltree.set_node_state(path, node_in_path, 1)
 				_skillpoints_changed()
+
+		if event.button_index == MOUSE_BUTTON_MIDDLE && event.pressed:
+			skilltree.get_node(path).remove_node(node_in_path)
+
+
+func _unhandled_input(event : InputEvent):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_MIDDLE && event.pressed:
+			add_node_index = add_target.add_node(event.position * skilltree.get_global_transform(), add_node_index)
 
 
 func _on_map_node_mouse_entered(_path : NodePath, _node_in_path : int, resource : WorldmapNodeData):
