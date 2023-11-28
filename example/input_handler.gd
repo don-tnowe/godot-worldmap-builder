@@ -83,3 +83,22 @@ func _on_reset_skills_pressed():
 	skilltree.max_unlock_cost = starting_skillpoints
 	skilltree.reset()
 	_skillpoints_changed()
+
+
+func _on_save_pressed():
+	$"Anchors/BottomLeftBox/Box/Box2/SaveData".text = var_to_str([
+		skilltree.max_unlock_cost,
+		skilltree.get_state(),
+	])
+
+
+func _on_load_pressed():
+	var varr = str_to_var($"Anchors/BottomLeftBox/Box/Box2/SaveData".text)
+	if !varr is Array || varr.size() < 2: return
+	if !varr[0] is int: return
+	if !varr[1] is Dictionary: return
+
+	skilltree.max_unlock_cost = varr[0]
+	skilltree.load_state(varr[1])
+
+	_skillpoints_changed()

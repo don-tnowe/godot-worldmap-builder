@@ -396,7 +396,48 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(8, 8)
 layout_mode = 2
 
+[node name="BottomLeftBox" type="HBoxContainer" parent="InputHandler/Anchors"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+
+[node name="Box" type="VBoxContainer" parent="InputHandler/Anchors/BottomLeftBox"]
+layout_mode = 2
+
+[node name="Box2" type="HBoxContainer" parent="InputHandler/Anchors/BottomLeftBox/Box"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InputHandler/Anchors/BottomLeftBox/Box/Box2"]
+layout_mode = 2
+text = "Save data:"
+
+[node name="SaveData" type="LineEdit" parent="InputHandler/Anchors/BottomLeftBox/Box/Box2"]
+layout_mode = 2
+
+[node name="Box" type="HBoxContainer" parent="InputHandler/Anchors/BottomLeftBox/Box"]
+layout_mode = 2
+
+[node name="Save" type="Button" parent="InputHandler/Anchors/BottomLeftBox/Box/Box"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save"
+
+[node name="Load" type="Button" parent="InputHandler/Anchors/BottomLeftBox/Box/Box"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Load"
+
+[node name="Control2" type="Control" parent="InputHandler/Anchors/BottomLeftBox/Box"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="InputHandler/Anchors/BottomLeftBox"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+
 [connection signal="node_gui_input" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_gui_input"]
 [connection signal="node_mouse_entered" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_mouse_entered"]
 [connection signal="node_mouse_exited" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_mouse_exited"]
 [connection signal="pressed" from="InputHandler/Anchors/BottomBox/ResetSkills" to="InputHandler" method="_on_reset_skills_pressed"]
+[connection signal="pressed" from="InputHandler/Anchors/BottomLeftBox/Box/Box/Save" to="InputHandler" method="_on_save_pressed"]
+[connection signal="pressed" from="InputHandler/Anchors/BottomLeftBox/Box/Box/Load" to="InputHandler" method="_on_load_pressed"]
