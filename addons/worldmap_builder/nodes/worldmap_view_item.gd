@@ -52,7 +52,11 @@ func get_node_data(index : int) -> WorldmapNodeData:
 
 ## Abstract method. Must offset all nodes by a vector.
 func offset_all_nodes(offset : Vector2):
-	assert(false, "Method WorldmapViewItem::offset_all_nodes() not implemented!")
+	offset_all_nodes_xform(Transform2D(Vector2(1, 0), Vector2(0, 1), offset))
+
+## Abstract method. Must offset all nodes by a Transform2D.
+func offset_all_nodes_xform(offset : Transform2D):
+	assert(false, "Method WorldmapViewItem::offset_all_nodes_xform() not implemented!")
 
 ## Must return the [Rect2] that encloses all worldmap nodes on this node, relative to this node's origin position.
 func get_clickable_rect() -> Rect2:

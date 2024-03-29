@@ -136,11 +136,11 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	return node_datas[index - 1]
 
 
-func offset_all_nodes(offset : Vector2):
-	start += offset
-	end += offset
-	handle_1 += offset
-	handle_2 += offset
+func offset_all_nodes_xform(offset : Transform2D):
+	start = offset * start
+	end = offset * end
+	handle_1 = offset * handle_1
+	handle_2 = offset * handle_2
 
 
 func _enter_tree():
@@ -149,9 +149,9 @@ func _enter_tree():
 		handle_1 = start + Vector2(0.0, 0.0)
 		handle_2 = end + Vector2(0.0, 0.0)
 
-	if position != Vector2.ZERO:
-		offset_all_nodes(position)
-		position = Vector2.ZERO
+	if transform != Transform2D.IDENTITY:
+		offset_all_nodes_xform(transform)
+		transform = Transform2D.IDENTITY
 
 
 func _draw():

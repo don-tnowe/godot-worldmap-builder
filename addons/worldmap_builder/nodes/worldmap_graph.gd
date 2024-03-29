@@ -167,17 +167,17 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	return node_datas[index]
 
 
-func offset_all_nodes(offset : Vector2):
+func offset_all_nodes_xform(offset : Transform2D):
 	for i in node_positions.size():
-		node_positions[i] += offset
+		node_positions[i] = offset * node_positions[i]
 
 	queue_redraw()
 
 
 func _enter_tree():
-	if position != Vector2.ZERO:
-		offset_all_nodes(position)
-		position = Vector2.ZERO
+	if transform != Transform2D.IDENTITY:
+		offset_all_nodes_xform(transform)
+		transform = Transform2D.IDENTITY
 
 
 func _draw():
