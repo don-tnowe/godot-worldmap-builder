@@ -43,6 +43,14 @@ enum PathMode {
 		end_with_empty = v
 		queue_redraw()
 
+## When moving graph nodes, snap the position to a grid with this size. If 0, disable snapping. [br]
+## This value is shared between all sibling [WorldmapViewItem]s.
+@export var node_grid_snap : int:
+	set(v):
+		_set_grid_snap(v)
+	get:
+		return get_parent().node_grid_snap
+
 var node_datas : Array[WorldmapNodeData]
 
 var _node_controls : Array[Control] = []

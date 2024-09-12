@@ -72,6 +72,11 @@ func get_clickable_rect() -> Rect2:
 	return result
 
 
+func _set_grid_snap(v : int):
+	if !is_inside_tree(): return
+	get_parent().node_grid_snap = maxf(v, 0)
+
+
 func _on_node_gui_input(event : InputEvent, index : int):
 	var data_under := get_node_data(index)
 	if data_under == null:

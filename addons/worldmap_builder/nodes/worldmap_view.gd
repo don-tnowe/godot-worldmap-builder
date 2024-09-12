@@ -53,6 +53,9 @@ signal node_mouse_exited(path : NodePath, node_in_path : int, resource : Worldma
 ## On start, [member initial_node] of [member initial_item] will receive this value.
 @export var initial_node_value := 1
 
+## When moving graph nodes, snap the position to a grid with this size. If 0, disable snapping.
+@export var node_grid_snap := 1
+
 ## When hovering over a node, highlight closest path to reach it.
 # @export var highlight_closest_path := true
 ## When hovering over a node, highlight nodes with the same [WorldmapNodeData] object.

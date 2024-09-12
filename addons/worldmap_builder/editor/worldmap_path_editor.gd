@@ -251,7 +251,11 @@ func _handle_drag(event : InputEventMouseMotion) -> bool:
 		var snap_targets : Array = edited_object.get_parent().get_children()
 		var snap_distance_squared := draw_marker.get_size().x * 0.5
 		snap_distance_squared *= snap_distance_squared
-		target_value = _get_snap(snap_targets, target_value, snap_distance_squared)
+		var target_value_snapped := _get_snap(snap_targets, target_value, snap_distance_squared)
+		if target_value_snapped == target_value:
+			target_value_snapped = target_value.snappedf(edited_object.get_parent().node_grid_snap)
+
+		target_value = target_value_snapped
 
 	undoredo.create_action("Move Handle", UndoRedo.MERGE_ENDS)
 	undoredo.add_undo_property(edited_object, property, old_value)
