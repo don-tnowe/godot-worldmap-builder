@@ -24,6 +24,8 @@ enum ConnectionMode {
 		notify_property_list_changed()
 ## Length of new connections, if a node is added by clicking on the white ring around the selected node.
 @export var connection_min_length := 0.0
+## Node snap drag movement apply if value is higher than 0
+@export var node_grid_snap: int = 0
 ## Nodes on this graph that can connect with overlapping [WorldmapViewItem]s, and act as snapping targets. [br]
 ## If the plugin is enabled, you can right-click a node to change this. Such nodes are shown as yellow.
 @export var end_connection_nodes : Array[int]:
@@ -239,7 +241,7 @@ func _set(property : StringName, value) -> bool:
 		var index := name_split[0].to_int()
 		match name_split[1]:
 			"data": node_datas[index] = value
-			"position": node_positions[index] = value
+			"position": node_positions[index] = value if node_grid_snap == 0 else Vector2(Vector2i(value / node_grid_snap) * node_grid_snap)
 
 		queue_redraw()
 		return true
