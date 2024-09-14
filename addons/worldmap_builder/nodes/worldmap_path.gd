@@ -180,6 +180,9 @@ func _draw():
 			continue
 
 		var tex := node_datas[i - 1].texture
+		if tex == null:
+			continue
+
 		var tex_size := tex.get_size()
 		var node := _node_controls[i - 1]
 		node.position = cur_pos - tex_size * 0.5
