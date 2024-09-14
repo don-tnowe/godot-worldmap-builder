@@ -36,47 +36,16 @@ static func open_context_menu_for_marker(obj : Object, screen_position : Vector2
 		if obj.mode != WorldmapPath.PathMode.ARC:
 			var diff_vec := Vector2()
 			var invert := 1 - marker_index * 2
-			diff_vec = invert * (obj.start - obj.end)
-			match marker_index:
-				0:
-					context_callbacks = [
-						(func(x):
-							obj.start = obj.end + Vector2((obj.start - obj.end).length(), 0.0).rotated(deg_to_rad(x))
-							),
-						(func(x):
-							obj.start = obj.end + (obj.start - obj.end).normalized() * max(x, 0.001)
-							),
-						]
-				1:
-					context_callbacks = [
-						(func(x):
-							obj.end = obj.start + Vector2((obj.end - obj.start).length(), 0.0).rotated(deg_to_rad(x))
-							),
-						(func(x):
-							obj.end = obj.start + (obj.end - obj.start).normalized() * max(x, 0.001)
-							),
-						]
-				2:
-					context_callbacks = [
-						(func(x):
-							obj.handle_1 = obj.start + Vector2((obj.handle_1 - obj.start).length(), 0.0).rotated(deg_to_rad(x))
-							),
-						(func(x):
-							obj.handle_1 = obj.start + (obj.handle_1 - obj.start).normalized() * max(x, 0.001)
-							),
-						]
-					diff_vec = obj.handle_1 - obj.start
-				3:
-					context_callbacks = [
-						(func(x):
-							obj.handle_2 = obj.end + Vector2((obj.handle_2 - obj.end).length(), 0.0).rotated(deg_to_rad(x))
-							),
-						(func(x):
-							obj.handle_2 = obj.end + (obj.handle_2 - obj.end).normalized() * max(x, 0.001)
-							),
-						]
-					diff_vec = obj.handle_2 - obj.end
+			if marker_index == 2:
+				diff_vec = obj.handle_1 - obj.start
 
+			elif marker_index == 3:
+				diff_vec = obj.handle_2 - obj.end
+
+			else:
+				diff_vec = invert * (obj.start - obj.end)
+
+			context_callbacks = _get_path_context_menu_callbacks(marker_index, obj)
 			context_props = ["Angle", "Length"]
 			context_values = [
 				rad_to_deg(diff_vec.angle()),
@@ -170,6 +139,48 @@ static func open_context_menu_for_marker(obj : Object, screen_position : Vector2
 	return null
 
 
+static func _get_path_context_menu_callbacks(marker_index : int, obj : WorldmapPath) -> Array[Callable]:
+	match marker_index:
+		0:
+			return [
+				(func(x):
+					obj.start = obj.end + Vector2((obj.start - obj.end).length(), 0.0).rotated(deg_to_rad(x))
+					),
+				(func(x):
+					obj.start = obj.end + (obj.start - obj.end).normalized() * max(x, 0.001)
+					),
+				]
+		1:
+			return [
+				(func(x):
+					obj.end = obj.start + Vector2((obj.end - obj.start).length(), 0.0).rotated(deg_to_rad(x))
+					),
+				(func(x):
+					obj.end = obj.start + (obj.end - obj.start).normalized() * max(x, 0.001)
+					),
+				]
+		2:
+			return [
+				(func(x):
+					obj.handle_1 = obj.start + Vector2((obj.handle_1 - obj.start).length(), 0.0).rotated(deg_to_rad(x))
+					),
+				(func(x):
+					obj.handle_1 = obj.start + (obj.handle_1 - obj.start).normalized() * max(x, 0.001)
+					),
+				]
+		3:
+			return [
+				(func(x):
+					obj.handle_2 = obj.end + Vector2((obj.handle_2 - obj.end).length(), 0.0).rotated(deg_to_rad(x))
+					),
+				(func(x):
+					obj.handle_2 = obj.end + (obj.handle_2 - obj.end).normalized() * max(x, 0.001)
+					),
+				]
+
+	return []
+
+
 static func open_context_menu(screen_position : Vector2, names : Array, values : Array, callbacks : Array, plugin : EditorPlugin) -> Popup:
 	var count := mini(names.size(), callbacks.size())
 	if values.size() < count:
@@ -248,7 +259,34 @@ static func open_context_menu(screen_position : Vector2, names : Array, values :
 							# prop_editor.get_child(2).id_pressed.emit.call_deferred(1)
 						)
 
-		prop_editor.custom_minimum_size = Vector2(64.0, 0.0)
+					"resource_array":
+						prop_editor = ScrollContainer.new()
+						prop_editor.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+						prop_editor.custom_minimum_size = Vector2(192.0, 64.0)
+
+						var picker_box := GridContainer.new()
+						picker_box.columns = 2
+						picker_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+						prop_editor.add_child(picker_box)
+
+						var picker_class_name : String = values[i][&"class_name"]
+						var picker_data : Array = values[i][&"data"]
+						for resource_i in values[i][&"data"].size():
+							var picker := EditorResourcePicker.new()
+							picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+							picker.base_type = picker_class_name
+							picker.edited_resource = picker_data[resource_i]
+							picker.resource_changed.connect(callbacks[i].bind(resource_i))
+							picker.resource_changed.connect(plugin.update_overlays.unbind(1))
+							picker.get_child(0).pressed.connect(func():
+								picker.get_child(1).pressed.emit()
+							)
+
+							var picker_label := Label.new()
+							picker_label.text = str(resource_i)
+							picker_box.add_child(picker_label)
+							picker_box.add_child(picker)
+
 		prop_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		prop_label.text = names[i]
 		cur_grid.add_child(prop_label)
