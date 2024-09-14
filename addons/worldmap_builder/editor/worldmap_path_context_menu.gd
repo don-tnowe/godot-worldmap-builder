@@ -5,15 +5,20 @@ static func open_context_menu_for_marker(obj : Object, screen_position : Vector2
 	if obj is WorldmapGraph:
 		var menu_box := [null]  # Keep it under reference so callbacks can be told to reference it before it's created
 		menu_box[0] = open_context_menu(screen_position,
-			["Is End Connection", "Delete"],
+			["Is End Connection", "Node Data", "Delete"],
 			[
 				obj.end_connection_nodes.find(marker_index) != -1,
+				{ 'data': obj.node_datas[marker_index], 'type': 'Resource'},
 			],
 			[
 				(func(x):
 					obj.end_connection_nodes.erase(marker_index)
 					if x:
 						obj.end_connection_nodes.append(marker_index)
+					),
+				(func(node_data):
+					obj.change_node(marker_index, node_data)
+					menu_box[0].hide()
 					),
 				(func():
 					obj.remove_node(marker_index)
@@ -210,18 +215,29 @@ static func open_context_menu(screen_position : Vector2, names : Array, values :
 				prop_editor.value = values[i]
 				prop_editor.value_changed.connect(callbacks[i])
 				prop_editor.value_changed.connect(plugin.update_overlays.unbind(1))
+				prop_editor.custom_minimum_size = Vector2(64.0, 0.0)
 
 			TYPE_STRING, TYPE_STRING_NAME:
 				prop_editor = LineEdit.new()
 				prop_editor.value = values[i]
 				prop_editor.text_changed.connect(callbacks[i])
 				prop_editor.text_changed.connect(plugin.update_overlays.unbind(1))
+				prop_editor.custom_minimum_size = Vector2(64.0, 0.0)
 
 			TYPE_BOOL:
 				prop_editor = CheckBox.new()
 				prop_editor.button_pressed = values[i]
 				prop_editor.toggled.connect(callbacks[i])
 				prop_editor.toggled.connect(plugin.update_overlays.unbind(1))
+				
+			TYPE_DICTIONARY:
+				match values[i]['type']:
+					'Resource':
+						prop_editor = EditorResourcePicker.new()
+						prop_editor.edited_resource = values[i]['data']
+						prop_editor.resource_changed.connect(callbacks[i])
+						prop_editor.resource_changed.connect(plugin.update_overlays.unbind(1))
+						prop_editor.custom_minimum_size = Vector2(192.0, 0.0)
 
 		prop_editor.custom_minimum_size = Vector2(64.0, 0.0)
 		prop_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
