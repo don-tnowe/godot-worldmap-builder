@@ -192,6 +192,8 @@ func _forward_canvas_gui_input(event : InputEvent) -> bool:
 					if event.position.distance_squared_to(markers[i]) < marker_radius_squared:
 						dragging = i
 						last_dragging = i
+						plugin.get_editor_interface().edit_node(null)
+						plugin.get_editor_interface().edit_node(edited_object)
 						return true
 
 				if _handle_non_marker_click(event):
@@ -315,8 +317,6 @@ func _handle_non_marker_click(event : InputEventMouseButton) -> bool:
 					handle_input_anyway = true
 					continue
 
-				plugin.get_editor_interface().edit_node(null)
-				plugin.get_editor_interface().edit_node(clicked_node)
 				return true
 
 	return handle_input_anyway
