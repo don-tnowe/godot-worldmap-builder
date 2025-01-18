@@ -292,7 +292,7 @@ func recalculate_map():
 ## If [code]point1[/code] can be connected to [code]point2[/code], returns [code]true[/code]. [br]
 ## See also: [method get_connection_cost].
 func can_connect(point1 : int, item1 : NodePath, point2 : int, item2 : NodePath = item1) -> bool:
-	return get_connection_cost(point1, item1, point2, item2)
+	return get_connection_cost(point1, item1, point2, item2) != INF
 
 ## If [code]point1[/code] can be connected to [code]point2[/code], returns the connection's cost, otherwise [code]INF[/code]. [br]
 ## If [code]item2[/code] not specified, check points on the same item. [br]
@@ -362,12 +362,12 @@ func get_connections_of_point(point : int, item_path : NodePath = get_path_to(in
 		if get_node_state(item_path, x.y) < min_state:
 			continue
 
-		var current_cost := item.get_connection_cost(x.x, x.y) if (!reverse_direction || both_directions) else item.get_connection_cost(x.y, x.x)
+		var current_cost := get_connection_cost(x.x, item_path, x.y, item_path) if (!reverse_direction || both_directions) else get_connection_cost(x.y, item_path, x.x, item_path)
 		if current_cost == INF:
 			if !both_directions:
 				continue
 
-			current_cost = item.get_connection_cost(x.y, x.x)
+			current_cost = get_connection_cost(x.y, item_path, x.x, item_path)
 
 		# If the current node is empty, check connected view items for a node at the same position.
 		if item.get_node_data(x.y) == null:
@@ -420,6 +420,15 @@ func get_node_state(item : NodePath, node : int) -> int:
 ## Get a node's [WorldmapNodeData] resource. Can be [code]null[/code] if it connects multiple [WorldmapViewItem]s.
 func get_node_data(item : NodePath, node : int) -> WorldmapNodeData:
 	return get_node(item).get_node_data(node)
+
+## Get a node's [WorldmapNodeData] resource. If the node is on top of multiple nodes from different [WorldmapViewItem]s, it returns the one with a valid data resource.
+func get_node_data_non_null(item : NodePath, node : int) -> WorldmapNodeData:
+	var item_object := get_node(item)
+	for x in _connections_by_items[item]:
+		if x.get_point_on_item(item_object) == node:
+			return x.items[x.filled_node_item].get_node_data(x.indices[x.filled_node_item])
+
+	return null
 
 ## Returns [code]true[/code] if requirements for activating a node were met.
 func can_activate(item : NodePath, node : int) -> bool:
@@ -594,40 +603,21 @@ func _update_activatable_local(item_path : NodePath):
 
 
 func _update_activatable_interitem(connection : ConnectionPoint):
-	var filled_node_index : int = connection.indices[connection.filled_node_item]
-	var filled_node_path : NodePath = connection.item_paths[connection.filled_node_item]
+	var filled_index := connection.indices[connection.filled_node_item]
+	var filled_item_path := connection.item_paths[connection.filled_node_item]
+	if _worldmap_state[filled_item_path][filled_index] > 0:
+		_worldmap_can_activate[filled_item_path][filled_index] = false
+		return
 
-	var filled_node : WorldmapViewItem = get_node(filled_node_path)
-	var nodes_state : Array = _worldmap_state[filled_node_path]
-	var nodes_activatable : Array[bool] = _worldmap_can_activate[filled_node_path]
+	var neighbors := get_connections_of_point(filled_index, filled_item_path, 1, false, true)
+	var activatable := false
+	for x in neighbors.costs:
+		if max_unlock_cost >= x:
+			activatable = true
+			break
 
-	if nodes_state[filled_node_index] > 0:
-		# if filled item is active:
-		# - make empty items below as-if active, update neighbors
-		for i in connection.items.size():
-			var cur_empty_item := connection.items[i]
-			_worldmap_state[connection.item_paths[i]][connection.indices[i]] = nodes_state[filled_node_index]
-			for x in cur_empty_item.get_node_neighbors(connection.indices[i]):
-				if _worldmap_state[connection.item_paths[i]][x] > 0:
-					continue
-
-				var cost : float = cur_empty_item.get_connection_cost(connection.indices[i], x)
-				if max_unlock_cost >= cost:
-					_worldmap_can_activate[connection.item_paths[i]][x] = true
-
-	elif !nodes_activatable[filled_node_index]:
-		# if filled item is inactive, but not activatable:
-		# - if any item below activatable, make filled item activatable
-		for i in connection.items.size():
-			var cur_empty_item := connection.items[i]
-			if _worldmap_can_activate[connection.item_paths[i]][connection.indices[i]]:
-				nodes_activatable[filled_node_index] = true
-				break
-
-	else:
-		# if filled item is activatable, not active:
-		# - nothing happens.
-		pass
+	for i in connection.indices.size():
+		_worldmap_can_activate[connection.item_paths[i]][connection.indices[i]] = activatable
 
 
 func _on_child_entered_tree(child : Node):

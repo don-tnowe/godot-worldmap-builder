@@ -112,7 +112,7 @@ func get_connection_cost(index1 : int, index2 : int) -> float:
 
 	var data := get_node_data(index2)
 	if data == null:
-		return 0.0
+		return get_parent().get_node_data_non_null(NodePath(name), index2).cost
 
 	return data.cost
 

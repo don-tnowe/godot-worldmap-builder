@@ -161,11 +161,11 @@ func get_node_position(index : int) -> Vector2:
 func get_connection_cost(index1 : int, index2 : int) -> float:
 	var cost : Vector2 = _costs_dict.get(Vector2i(index1, index2), Vector2(-INF, -INF))
 	if cost == Vector2(-INF, -INF):
-		var index_swap := index1
-		index1 = index2
-		index2 = index_swap
-		cost = _costs_dict.get(Vector2i(index1, index2), Vector2(INF, INF))
+		cost = _costs_dict.get(Vector2i(index2, index1), Vector2(INF, INF))
 		cost = Vector2(cost.y, cost.x)
+
+	if cost.x != INF && node_datas[index2] == null:
+		cost.x *= get_parent().get_node_data_non_null(NodePath(name), index2).cost
 
 	return cost.x
 
@@ -391,8 +391,8 @@ func _connections_changed():
 	for i in connection_nodes.size():
 		var costs_pair := connection_costs[i]
 		var nodes_pair := connection_nodes[i]
-		costs_pair.x *= node_datas[nodes_pair.y].cost if node_datas[nodes_pair.y] != null else 0.0
-		costs_pair.y *= node_datas[nodes_pair.x].cost if node_datas[nodes_pair.x] != null else 0.0
+		costs_pair.x *= node_datas[nodes_pair.y].cost if node_datas[nodes_pair.y] != null else 1.0
+		costs_pair.y *= node_datas[nodes_pair.x].cost if node_datas[nodes_pair.x] != null else 1.0
 		_costs_dict[nodes_pair] = costs_pair
 		_costs_dict[Vector2(nodes_pair.y, nodes_pair.x)] = Vector2(costs_pair.x, costs_pair.y)
 
