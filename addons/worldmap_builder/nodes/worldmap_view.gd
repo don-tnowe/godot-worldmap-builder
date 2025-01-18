@@ -294,7 +294,7 @@ func recalculate_map():
 func can_connect(point1 : int, item1 : NodePath, point2 : int, item2 : NodePath = item1) -> bool:
 	return get_connection_cost(point1, item1, point2, item2)
 
-## If [code]point1[/code] can be connected to [code]point2[/code], returns its cost, otherwise [code]INF[/code]. [br]
+## If [code]point1[/code] can be connected to [code]point2[/code], returns the connection's cost, otherwise [code]INF[/code]. [br]
 ## If [code]item2[/code] not specified, check points on the same item. [br]
 ## [b]Note: [/b]if a map-item's movement is uni-directional and (p1 -> p2) would return a valid cost, (p2 -> p1) would not.
 func get_connection_cost(point1 : int, item1 : NodePath, point2 : int, item2 : NodePath = item1) -> float:
@@ -389,7 +389,7 @@ func get_connections_of_point(point : int, item_path : NodePath = get_path_to(in
 	return result
 
 ## Set a node's state, activating or deactivating it. if [code]state[/code] is non-zero, it will show as active and highlight inactive neighbors. [br]
-## Numbers other than 0 or 1 can be stored for extra information, such as level. [br]
+## Numbers other than 0 or 1 can be stored for extra information, such as upgrade level or level completion state. [br]
 ## Return the "cost to change node's state by this much", which you can then subtract from [max_unlock_cost] to update available nodes. [br]
 ## The calculation for the return is: [code](<provided state> - <node's previous state>) * <node data's cost>[/code].
 func set_node_state(item : NodePath, node : int, state : int) -> int:
@@ -409,7 +409,7 @@ func set_node_state(item : NodePath, node : int, state : int) -> int:
 	var node_data := get_node_data(item, node)
 	return (state - old_state) * (0.0 if node_data == null else node_data.cost)
 
-## Get a node's state.
+## Get a node's state value, set through [method set_node_state].
 func get_node_state(item : NodePath, node : int) -> int:
 	var state_arr : Array = _worldmap_state.get(item, [])
 	if state_arr.size() <= node:
@@ -417,7 +417,7 @@ func get_node_state(item : NodePath, node : int) -> int:
 
 	return state_arr[node]
 
-## Get a node's [WorldmapNodeData] resource.
+## Get a node's [WorldmapNodeData] resource. Can be [code]null[/code] if it connects multiple [WorldmapViewItem]s.
 func get_node_data(item : NodePath, node : int) -> WorldmapNodeData:
 	return get_node(item).get_node_data(node)
 
@@ -425,12 +425,12 @@ func get_node_data(item : NodePath, node : int) -> WorldmapNodeData:
 func can_activate(item : NodePath, node : int) -> bool:
 	return _worldmap_can_activate[item][node]
 
-## Returns [code]true[/code] if [method set_node_state] can be called to deactivate the node without making other activated nodes unreachable from the graph's starting point. [br]
+## Returns [code]true[/code] if calling [method set_node_state] to deactivate the node would not make other activated nodes unreachable from the graph's starting point. [br]
 ## [code]min_state[/code] is the minimum value to be considered "activated".
 func can_deactivate(item : NodePath, node : int, min_state : int = 1) -> bool:
 	return can_deactivate_multiple([item], [node], min_state)
 
-## Returns [code]true[/code] if [method set_node_state] can be called to deactivate all specified nodes at once without making other activated nodes unreachable from the graph's starting point. [br]
+## Returns [code]true[/code] if calling [method set_node_state] to deactivate all specified nodes at once would not make other activated nodes unreachable from the graph's starting point. [br]
 ## [code]min_state[/code] is the minimum value to be considered "activated".
 func can_deactivate_multiple(item_node_paths : Array[NodePath], node_indices : Array[int], min_state : int = 1) -> bool:
 	var initial_item_path := get_path_to(initial_item)
