@@ -37,6 +37,7 @@ class ConnectionPoint extends RefCounted:
 	func _to_string():
 		return "[%s : id %s, map items: %s]" % [position, id, range(items.size()).map(func(i): return "%s::%s" % [items[i].name, indices[i]])]
 
+
 class NodeList extends RefCounted:
 	var paths : Array[NodePath] = []
 	var indices : Array[int] = []
@@ -46,6 +47,12 @@ class NodeList extends RefCounted:
 		paths.append_array(other.paths)
 		indices.append_array(other.indices)
 		costs.append_array(other.costs)
+
+
+	func remove_at(index : int):
+		paths.remove_at(index)
+		indices.remove_at(index)
+		costs.remove_at(index)
 
 ## Emitted when a node on this map receives input.
 signal node_gui_input(event : InputEvent, path : NodePath, node_in_path : int, resource : WorldmapNodeData)
@@ -311,12 +318,14 @@ func get_connection_cost(point1 : int, item1 : NodePath, point2 : int, item2 : N
 	return 0.0
 
 ## Get all points which can be reached in 1 connection from the specified point. [br]
-## [code]min_state[/code] defines the minimum [method set_node_state] to be considered connected, useful for getting only activated neighbors. [code]reverse_direction[/code] will, on unidirectional connections, check th connection in the reverse direction. [br]
+## - [code]min_state[/code] defines the minimum [method set_node_state] to be considered connected, useful for getting only activated neighbors. [br]
+## - [code]both_directions[/code] will consider points "connected" regardless if the connection is bidirectional. [br]
+## - [code]reverse_direction[/code] will check the opposite direction for unidirectional connections. [br]
 ## Returns an object with properties storing arrays of connection data. [br]
 ## - [code]indices[/code] is an array of node indices within a [WorldmapViewItem] [br]
 ## - [code]paths[/code] is an array of [WorldmapViewItem] [NodePath]s, not needed for single-item maps. [br]
 ## - [code]costs[/code] is the costs of connecting to the points from the specified point.
-func get_connections_of_point(point : int, item_path : NodePath = get_path_to(initial_item), min_state : int = 0, reverse_direction : bool = false, same_item_only : bool = false) -> NodeList:
+func get_connections_of_point(point : int, item_path : NodePath = get_path_to(initial_item), min_state : int = 0, both_directions : bool = false, reverse_direction : bool = false, same_item_only : bool = false) -> NodeList:
 	var item : WorldmapViewItem = get_node(item_path)
 	var connections_to_item : Array = _connections_by_items.get(item_path, [])
 	var result := NodeList.new()
@@ -335,6 +344,7 @@ func get_connections_of_point(point : int, item_path : NodePath = get_path_to(in
 					x.indices[i],
 					x.item_paths[i],
 					min_state,
+					both_directions,
 					reverse_direction,
 					true,
 				))
@@ -352,9 +362,12 @@ func get_connections_of_point(point : int, item_path : NodePath = get_path_to(in
 		if get_node_state(item_path, x.y) < min_state:
 			continue
 
-		var current_cost := item.get_connection_cost(x.y, x.x) if reverse_direction else item.get_connection_cost(x.x, x.y)
+		var current_cost := item.get_connection_cost(x.x, x.y) if (!reverse_direction || both_directions) else item.get_connection_cost(x.y, x.x)
 		if current_cost == INF:
-			continue
+			if !both_directions:
+				continue
+
+			current_cost = item.get_connection_cost(x.y, x.x)
 
 		# If the current node is empty, check connected view items for a node at the same position.
 		if item.get_node_data(x.y) == null:
@@ -386,6 +399,12 @@ func set_node_state(item : NodePath, node : int, state : int) -> int:
 
 	var old_state : int = state_arr[node]
 	state_arr[node] = state
+
+	for x : ConnectionPoint in _connections_by_items.get(item, []):
+		if x.get_point_on_item(get_node(item)) == node:
+			for i in x.indices.size():
+				_worldmap_state[x.item_paths[i]][x.indices[i]] = state
+
 	_update_activatable()
 	var node_data := get_node_data(item, node)
 	return (state - old_state) * (0.0 if node_data == null else node_data.cost)
@@ -405,6 +424,74 @@ func get_node_data(item : NodePath, node : int) -> WorldmapNodeData:
 ## Returns [code]true[/code] if requirements for activating a node were met.
 func can_activate(item : NodePath, node : int) -> bool:
 	return _worldmap_can_activate[item][node]
+
+## Returns [code]true[/code] if [method set_node_state] can be called to deactivate the node without making other activated nodes unreachable from the graph's starting point. [br]
+## [code]min_state[/code] is the minimum value to be considered "activated".
+func can_deactivate(item : NodePath, node : int, min_state : int = 1) -> bool:
+	return can_deactivate_multiple([item], [node], min_state)
+
+## Returns [code]true[/code] if [method set_node_state] can be called to deactivate all specified nodes at once without making other activated nodes unreachable from the graph's starting point. [br]
+## [code]min_state[/code] is the minimum value to be considered "activated".
+func can_deactivate_multiple(item_node_paths : Array[NodePath], node_indices : Array[int], min_state : int = 1) -> bool:
+	var initial_item_path := get_path_to(initial_item)
+	for i in item_node_paths.size():
+		if item_node_paths[i] == initial_item_path && node_indices[i] == initial_node:
+			# Can't disconnect the root node. How are you even gonna reconnect anything after that?
+			return false
+
+	var target_connections_from := NodeList.new()
+	for i in item_node_paths.size():
+		target_connections_from.append_list(get_connections_of_point(node_indices[i], item_node_paths[i], min_state, true, false))
+
+	if target_connections_from.indices.size() == 1:
+		# If no nodes are dependent on the target node, it's safe to disconnect.
+		return true
+
+	var must_be_reachable := {}
+	var must_be_reachable_count := 0
+	var traversed := {}
+	for k in _worldmap_state:
+		var new_states : Array[bool] = []
+		new_states.resize(_worldmap_state[k].size())
+		new_states.fill(false)
+		must_be_reachable[k] = new_states
+		traversed[k] = new_states.duplicate()
+
+	for i in target_connections_from.indices.size():
+		var current_view_item : Array = must_be_reachable[target_connections_from.paths[i]]
+		if !current_view_item[target_connections_from.indices[i]]:
+			current_view_item[target_connections_from.indices[i]] = true
+			must_be_reachable_count += 1
+
+	# You can disconnect a node if all its neighbors are reachable from the graph's start.
+	# Initial node is the first to be traversed. Mark it as "must not be reachable" because traversed nodes will never be checked again.
+	traversed[initial_item_path][initial_node] = true
+	if must_be_reachable[initial_item_path][initial_node]:
+		must_be_reachable_count -= 1
+
+	var left_to_traverse := get_connections_of_point(initial_node, initial_item_path, min_state, false, false)
+	for i in item_node_paths.size():
+		# Marking the target nodes as traversed prevents the algorithm from continuing through them.
+		traversed[item_node_paths[i]][node_indices[i]] = true
+
+	while left_to_traverse.indices.size() != 0 && must_be_reachable_count > 0:
+		var current_traversing := left_to_traverse.indices.size() - 1
+		var current_path := left_to_traverse.paths[current_traversing]
+		var current_index := left_to_traverse.indices[current_traversing]
+		left_to_traverse.remove_at(current_traversing)
+		if traversed[current_path][current_index]:
+			# Don't check already checked nodes.
+			continue
+
+		traversed[current_path][current_index] = true
+		if must_be_reachable[current_path][current_index]:
+			must_be_reachable[current_path][current_index] = false
+			must_be_reachable_count -= 1
+
+		var current_traversing_neighbors := get_connections_of_point(current_index, current_path, min_state, false, false)
+		left_to_traverse.append_list(current_traversing_neighbors)
+
+	return must_be_reachable_count == 0
 
 ## For each [WorldmapNodeData] in the graph, returns its [method get_node_state]. Duplicate resources will have their numbers summed up.
 func get_all_nodes() -> Dictionary:
