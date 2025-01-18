@@ -17,7 +17,7 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vql2y"]
 atlas = ExtResource("2_76jt8")
-region = Rect2(32, 16, 32, 32)
+region = Rect2(32, 32, 32, 32)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_w5rdv"]
 load_path = "res://.godot/imported/skilltree_borders.png-b022ab63f57155a8a0a421454feb26f1.ctex"
@@ -36,7 +36,7 @@ priority = -5
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pr8m7"]
 atlas = ExtResource("2_76jt8")
-region = Rect2(64, 16, 32, 32)
+region = Rect2(64, 32, 32, 32)
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_6ivhx"]
 load_path = "res://.godot/imported/skilltree_borders.png-b022ab63f57155a8a0a421454feb26f1.ctex"
@@ -49,13 +49,13 @@ icon_border_modulate = Color(1, 1, 1, 1)
 connection_modulate = Color(1, 1, 1, 1)
 icon_borders = Array[Texture2D]([SubResource("AtlasTexture_pr8m7")])
 straight_tex = SubResource("CompressedTexture2D_6ivhx")
-straight_tex_region = Rect2(0, 8, 128, 8)
+straight_tex_region = Rect2(0, 16, 128, 8)
 straight_tex_repeat = false
 priority = -3
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wm6gh"]
 atlas = ExtResource("2_76jt8")
-region = Rect2(0, 16, 32, 32)
+region = Rect2(0, 32, 32, 32)
 
 [sub_resource type="Resource" id="Resource_2hquj"]
 resource_name = "Inactive"
@@ -110,6 +110,7 @@ end = Vector2(108.877, 116.312)
 handle_1 = Vector2(-261.385, 92.8094)
 handle_2 = Vector2(-276.385, 478.299)
 bidirectional = true
+node_grid_snap = 1
 node_count = 6
 node_0/data = ExtResource("5_sdu2a")
 node_1/data = ExtResource("2_xtlsu")
@@ -127,6 +128,7 @@ handle_2 = Vector2(-26.4655, 154.632)
 mode = 1
 bidirectional = true
 end_with_empty = true
+node_grid_snap = 1
 node_count = 8
 node_0/data = ExtResource("5_fevd2")
 node_1/data = ExtResource("5_fevd2")
@@ -147,6 +149,7 @@ handle_1 = Vector2(655.095, 374.232)
 handle_2 = Vector2(-384.985, 261.791)
 mode = 1
 bidirectional = true
+node_grid_snap = 1
 node_count = 9
 node_0/data = ExtResource("6_jp1vb")
 node_1/data = ExtResource("6_jp1vb")
@@ -166,6 +169,7 @@ handle_1 = Vector2(937.695, 357.403)
 handle_2 = Vector2(655.294, 319.306)
 mode = 2
 bidirectional = true
+node_grid_snap = 1
 node_count = 9
 node_0/data = ExtResource("4_ytcj4")
 node_1/data = ExtResource("4_ytcj4")
@@ -180,7 +184,8 @@ node_8/data = ExtResource("4_ytcj4")
 [node name="WorldmapGraph" type="Node2D" parent="MarginContainer/ActualMarginContainer/Map"]
 script = ExtResource("7_miljq")
 connection_min_length = 64.0
-end_connection_nodes = Array[int]([4, 8, 9])
+node_grid_snap = 1
+end_connection_nodes = Array[int]([4, 8, 9, 5])
 node_count = 10
 node_0/data = ExtResource("8_41shr")
 node_0/position = Vector2(262.132, 344.289)
@@ -190,10 +195,10 @@ node_2/data = ExtResource("8_41shr")
 node_2/position = Vector2(371.725, 359.021)
 node_3/data = ExtResource("8_41shr")
 node_3/position = Vector2(202.332, 321.317)
-node_4/data = ExtResource("5_sdu2a")
-node_4/position = Vector2(247.316, 216.157)
+node_4/data = null
+node_4/position = Vector2(247, 216)
 node_5/data = ExtResource("8_41shr")
-node_5/position = Vector2(304.405, 250.569)
+node_5/position = Vector2(306, 251)
 node_6/data = ExtResource("8_41shr")
 node_6/position = Vector2(309.995, 401.607)
 node_7/data = ExtResource("8_41shr")
@@ -202,7 +207,7 @@ node_8/data = ExtResource("8_41shr")
 node_8/position = Vector2(471.385, 264.547)
 node_9/data = ExtResource("8_41shr")
 node_9/position = Vector2(309.995, 465.607)
-connection_count = 10
+connection_count = 11
 connection_0/nodes = Vector2i(0, 3)
 connection_1/nodes = Vector2i(0, 1)
 connection_2/nodes = Vector2i(1, 5)
@@ -213,37 +218,43 @@ connection_6/nodes = Vector2i(6, 2)
 connection_7/nodes = Vector2i(2, 7)
 connection_8/nodes = Vector2i(7, 8)
 connection_9/nodes = Vector2i(9, 6)
+connection_10/nodes = Vector2i(5, 7)
 
 [node name="WorldmapGraph2" type="Node2D" parent="MarginContainer/ActualMarginContainer/Map"]
 script = ExtResource("7_miljq")
 connection_min_length = 64.0
-end_connection_nodes = Array[int]([0, 6])
-node_count = 7
-node_0/data = null
-node_0/position = Vector2(247.316, 216.157)
+node_grid_snap = 1
+end_connection_nodes = Array[int]([0, 6, 7])
+node_count = 8
+node_0/data = ExtResource("5_sdu2a")
+node_0/position = Vector2(247, 216)
 node_1/data = ExtResource("9_vbyll")
-node_1/position = Vector2(183.316, 216.157)
+node_1/position = Vector2(183, 216)
 node_2/data = ExtResource("9_vbyll")
-node_2/position = Vector2(247.316, 152.157)
+node_2/position = Vector2(247, 152)
 node_3/data = ExtResource("9_vbyll")
-node_3/position = Vector2(310.725, 152.052)
+node_3/position = Vector2(322, 187)
 node_4/data = ExtResource("9_vbyll")
-node_4/position = Vector2(247.316, 88.1594)
+node_4/position = Vector2(247, 88)
 node_5/data = ExtResource("9_vbyll")
-node_5/position = Vector2(183.437, 154.16)
+node_5/position = Vector2(183, 152)
 node_6/data = null
 node_6/position = Vector2(108.877, 116.312)
-connection_count = 6
+node_7/data = null
+node_7/position = Vector2(306, 251)
+connection_count = 7
 connection_0/nodes = Vector2i(2, 4)
 connection_1/nodes = Vector2i(1, 5)
 connection_2/nodes = Vector2i(5, 6)
 connection_3/nodes = Vector2i(0, 1)
 connection_4/nodes = Vector2i(0, 2)
 connection_5/nodes = Vector2i(3, 2)
+connection_6/nodes = Vector2i(3, 7)
 
 [node name="WorldmapGraph3" type="Node2D" parent="MarginContainer/ActualMarginContainer/Map"]
 script = ExtResource("7_miljq")
 connection_min_length = 64.0
+node_grid_snap = 1
 end_connection_nodes = Array[int]([9, 0])
 node_count = 10
 node_0/data = null
@@ -343,7 +354,7 @@ size_flags_vertical = 8
 [node name="Label" type="Label" parent="InputHandler/Anchors/BottomBox"]
 self_modulate = Color(1, 1, 1, 0.498039)
 layout_mode = 2
-text = "Left-click to assign. Middle-click to edit"
+text = "Left-click to assign/unassign. Middle-click to edit"
 horizontal_alignment = 1
 
 [node name="Panel" type="PanelContainer" parent="InputHandler/Anchors/BottomBox"]
@@ -353,6 +364,11 @@ layout_mode = 2
 layout_mode = 2
 text = "20"
 horizontal_alignment = 1
+
+[node name="Add" type="Button" parent="InputHandler/Anchors/BottomBox/Panel"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Add 1"
 
 [node name="ResetSkills" type="Button" parent="InputHandler/Anchors/BottomBox"]
 layout_mode = 2
@@ -438,6 +454,7 @@ layout_mode = 2
 [connection signal="node_gui_input" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_gui_input"]
 [connection signal="node_mouse_entered" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_mouse_entered"]
 [connection signal="node_mouse_exited" from="MarginContainer/ActualMarginContainer/Map" to="InputHandler" method="_on_map_node_mouse_exited"]
+[connection signal="pressed" from="InputHandler/Anchors/BottomBox/Panel/Add" to="InputHandler" method="_on_add_pressed"]
 [connection signal="pressed" from="InputHandler/Anchors/BottomBox/ResetSkills" to="InputHandler" method="_on_reset_skills_pressed"]
 [connection signal="pressed" from="InputHandler/Anchors/BottomLeftBox/Box/Box/Save" to="InputHandler" method="_on_save_pressed"]
 [connection signal="pressed" from="InputHandler/Anchors/BottomLeftBox/Box/Box/Load" to="InputHandler" method="_on_load_pressed"]

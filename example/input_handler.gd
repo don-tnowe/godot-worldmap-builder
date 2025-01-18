@@ -53,9 +53,15 @@ func _on_map_node_gui_input(event : InputEvent, path : NodePath, node_in_path : 
 
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
-			if skilltree.can_activate(path, node_in_path):
+			if skilltree.get_node_state(path, node_in_path) <= 0:
+				if skilltree.can_activate(path, node_in_path):
+					tooltip_root.hide()
+					skilltree.max_unlock_cost -= skilltree.set_node_state(path, node_in_path, 1)
+					_skillpoints_changed()
+
+			elif skilltree.can_deactivate(path, node_in_path):
 				tooltip_root.hide()
-				skilltree.max_unlock_cost -= skilltree.set_node_state(path, node_in_path, 1)
+				skilltree.max_unlock_cost -= skilltree.set_node_state(path, node_in_path, 0)
 				_skillpoints_changed()
 
 		if event.button_index == MOUSE_BUTTON_MIDDLE && event.pressed:
@@ -82,6 +88,11 @@ func _on_map_node_mouse_exited(_path : NodePath, _node_in_path : int, _resource 
 func _on_reset_skills_pressed():
 	skilltree.max_unlock_cost = starting_skillpoints
 	skilltree.reset()
+	_skillpoints_changed()
+
+
+func _on_add_pressed() -> void:
+	skilltree.max_unlock_cost += 1
 	_skillpoints_changed()
 
 
