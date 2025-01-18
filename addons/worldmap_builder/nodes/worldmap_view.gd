@@ -27,8 +27,25 @@ class ConnectionPoint extends RefCounted:
 			filled_node_item = items.size() - 1
 
 
+	func get_point_on_item(item : WorldmapViewItem) -> int:
+		for i in items.size():
+			if items[i] == item:
+				return indices[i]
+
+		return -1
+
 	func _to_string():
 		return "[%s : id %s, map items: %s]" % [position, id, range(items.size()).map(func(i): return "%s::%s" % [items[i].name, indices[i]])]
+
+class NodeList extends RefCounted:
+	var paths : Array[NodePath] = []
+	var indices : Array[int] = []
+	var costs : Array[float] = []
+
+	func append_list(other : NodeList):
+		paths.append_array(other.paths)
+		indices.append_array(other.indices)
+		costs.append_array(other.costs)
 
 ## Emitted when a node on this map receives input.
 signal node_gui_input(event : InputEvent, path : NodePath, node_in_path : int, resource : WorldmapNodeData)
@@ -292,6 +309,71 @@ func get_connection_cost(point1 : int, item1 : NodePath, point2 : int, item2 : N
 
 	# If it's a connection between subgraphs, it's free - the nodes are at the same position.
 	return 0.0
+
+## Get all points which can be reached in 1 connection from the specified point. [br]
+## [code]min_state[/code] defines the minimum [method set_node_state] to be considered connected, useful for getting only activated neighbors. [code]reverse_direction[/code] will, on unidirectional connections, check th connection in the reverse direction. [br]
+## Returns an object with properties storing arrays of connection data. [br]
+## - [code]indices[/code] is an array of node indices within a [WorldmapViewItem] [br]
+## - [code]paths[/code] is an array of [WorldmapViewItem] [NodePath]s, not needed for single-item maps. [br]
+## - [code]costs[/code] is the costs of connecting to the points from the specified point.
+func get_connections_of_point(point : int, item_path : NodePath = get_path_to(initial_item), min_state : int = 0, reverse_direction : bool = false, same_item_only : bool = false) -> NodeList:
+	var item : WorldmapViewItem = get_node(item_path)
+	var connections_to_item : Array = _connections_by_items.get(item_path, [])
+	var result := NodeList.new()
+	# This point may be overlapping a point on other view items.
+	if !same_item_only:
+		for x in connections_to_item:
+			if x.get_point_on_item(item) != point:
+				continue
+
+			for i in x.indices.size():
+				if x.item_paths[i] == item_path:
+					# That will be retrieved in the current method call, in code below.
+					continue
+
+				result.append_list(get_connections_of_point(
+					x.indices[i],
+					x.item_paths[i],
+					min_state,
+					reverse_direction,
+					true,
+				))
+
+	var connections_on_item := item.get_connections()
+	var check_nulls := {}
+	for x in connections_on_item:
+		if x.x != point && x.y != point:
+			continue
+
+		if x.y == point:
+			# Flip to make the source point the first component, to avoid duplicating code for both cases.
+			x = Vector2i(x.y, x.x)
+
+		if get_node_state(item_path, x.y) < min_state:
+			continue
+
+		var current_cost := item.get_connection_cost(x.y, x.x) if reverse_direction else item.get_connection_cost(x.x, x.y)
+		if current_cost == INF:
+			continue
+
+		# If the current node is empty, check connected view items for a node at the same position.
+		if item.get_node_data(x.y) == null:
+			check_nulls[x.y] = current_cost
+			continue
+
+		result.indices.append(x.y)
+		result.paths.append(item_path)
+		result.costs.append(current_cost)
+
+	if check_nulls.size() > 0:
+		for x in connections_to_item:
+			var pt : int = x.get_point_on_item(item)
+			if check_nulls.has(pt):
+				result.indices.append(x.indices[x.filled_node_item])
+				result.paths.append(x.item_paths[x.filled_node_item])
+				result.costs.append(check_nulls[pt])
+
+	return result
 
 ## Set a node's state, activating or deactivating it. if [code]state[/code] is non-zero, it will show as active and highlight inactive neighbors. [br]
 ## Numbers other than 0 or 1 can be stored for extra information, such as level. [br]
