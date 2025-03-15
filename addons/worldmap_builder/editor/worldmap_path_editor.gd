@@ -1,6 +1,7 @@
 extends RefCounted
 
 const WorldmapEditorContextMenuClass := preload("res://addons/worldmap_builder/editor/worldmap_path_context_menu.gd")
+const ResourceDropHandlerClass := preload("res://addons/worldmap_builder/editor/resource_drop_handler.gd")
 
 var plugin : EditorPlugin
 
@@ -17,6 +18,7 @@ var button_margin := 4.0
 var edited_object : Object:
 	set(v):
 		edited_object = v
+		drop_handler.set_enabled(v is WorldmapViewItem)
 		if v is WorldmapViewItem:
 			var siblings : Array = v.get_parent().get_children()
 			edited_sibling_rects.resize(siblings.size())
@@ -32,6 +34,7 @@ var edited_sibling_rects : Array[Rect2] = []
 var last_dragging := -1
 var dragging := -1
 var context_menu : Popup
+var drop_handler : Control
 
 
 func _init(plugin : EditorPlugin):
@@ -40,7 +43,15 @@ func _init(plugin : EditorPlugin):
 	draw_marker_add = ctrl.get_theme_icon(&"EditorHandleAdd", &"EditorIcons")
 	draw_marker_checkbox_checked = ctrl.get_theme_icon(&"checked", &"CheckBox")
 	draw_marker_checkbox_unchecked = ctrl.get_theme_icon(&"unchecked", &"CheckBox")
+
+	drop_handler = ResourceDropHandlerClass.new(self)
+	ctrl.add_child(drop_handler)
+
 	self.plugin = plugin
+
+
+func _exit_tree():
+	drop_handler.queue_free()
 
 
 func _handles(object : Object):
@@ -48,7 +59,12 @@ func _handles(object : Object):
 
 
 func _forward_canvas_draw_over_viewport(overlay : Control):
-	if edited_object == null: return
+	if edited_object == null:
+		return
+
+	drop_handler.position = overlay.global_position
+	drop_handler.size = overlay.size
+
 	var vp_xform := _get_viewport_xform()
 	var markers := _get_marker_positions()
 	if markers.size() <= last_dragging:

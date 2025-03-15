@@ -182,6 +182,10 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	return node_datas[index]
 
 
+func set_node_data(index : int, value : WorldmapNodeData) -> void:
+	node_datas[index] = value
+
+
 func offset_all_nodes_xform(offset : Transform2D):
 	for i in node_positions.size():
 		node_positions[i] = offset * node_positions[i]

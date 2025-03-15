@@ -138,10 +138,17 @@ func get_node_neighbors(index : int) -> Array[int]:
 
 
 func get_node_data(index : int) -> WorldmapNodeData:
-	if index > node_datas.size() || index == 0:
+	if index > node_datas.size() || index <= 0:
 		return null
 
 	return node_datas[index - 1]
+
+
+func set_node_data(index : int, value : WorldmapNodeData) -> void:
+	if index > node_datas.size() || index <= 0:
+		return
+
+	node_datas[index - 1] = value
 
 
 func offset_all_nodes_xform(offset : Transform2D):

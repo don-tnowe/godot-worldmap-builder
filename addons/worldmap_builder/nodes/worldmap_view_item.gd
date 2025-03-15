@@ -50,6 +50,10 @@ func get_node_data(index : int) -> WorldmapNodeData:
 	assert(false, "Method WorldmapViewItem::get_node_data() not implemented!")
 	return null
 
+## Abstract method. Must set the [WorldmapNodeData] object inside the specified node.
+func set_node_data(index : int, value : WorldmapNodeData) -> void:
+	assert(false, "Method WorldmapViewItem::set_node_data() not implemented!")
+
 ## Abstract method. Must offset all nodes by a vector.
 func offset_all_nodes(offset : Vector2):
 	offset_all_nodes_xform(Transform2D(Vector2(1, 0), Vector2(0, 1), offset))

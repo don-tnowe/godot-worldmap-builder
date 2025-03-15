@@ -42,12 +42,14 @@ func _handles(object : Object):
 func _edit(object : Object):
 	for x in editor_views:
 		if x == null:
-			x.edited_object = null
 			continue
 
 		if x._handles(object):
 			x.edited_object = object
 			break
+
+		else:
+			x.edited_object = null
 
 
 func _forward_canvas_draw_over_viewport(overlay : Control):
@@ -78,3 +80,7 @@ func _enter_tree():
 func _exit_tree():
 	for x in added_scripts:
 		remove_custom_type(x[0])
+
+	for x in editor_views:
+		if is_instance_valid(x) && x.has_method(&"_exit_tree"):
+			x._exit_tree()
