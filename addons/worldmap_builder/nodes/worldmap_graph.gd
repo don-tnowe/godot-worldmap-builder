@@ -68,13 +68,6 @@ func add_node(pos : Vector2, parent_node : int, node_data : WorldmapNodeData = n
 	get_parent().view_item_node_added(self, node_datas.size() - 1)
 	return node_datas.size() - 1
 
-## Replaces the data of node [code]index[/code] with a given [code]node_data[/code].
-func change_node(index: int, node_data: WorldmapNodeData = null) -> int:
-	node_datas[index] = node_data
-	queue_redraw()
-	get_parent().queue_redraw()
-	return index
-
 ## Removes a node, along with all of its connections.[br]
 func remove_node(index : int):
 	node_datas.remove_at(index)
@@ -184,6 +177,8 @@ func get_node_data(index : int) -> WorldmapNodeData:
 
 func set_node_data(index : int, value : WorldmapNodeData) -> void:
 	node_datas[index] = value
+	queue_redraw()
+	get_parent().queue_redraw()
 
 
 func offset_all_nodes_xform(offset : Transform2D):

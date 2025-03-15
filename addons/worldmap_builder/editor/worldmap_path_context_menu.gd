@@ -1,5 +1,7 @@
 extends RefCounted
 
+static var previous_context_menu : Node
+
 
 static func open_context_menu_for_marker(obj : Object, screen_position : Vector2, marker_index : int, plugin : EditorPlugin) -> Popup:
 	if obj is WorldmapGraph:
@@ -17,7 +19,7 @@ static func open_context_menu_for_marker(obj : Object, screen_position : Vector2
 						obj.end_connection_nodes.append(marker_index)
 					),
 				(func(node_data):
-					obj.change_node(marker_index, node_data)
+					obj.set_node_data(marker_index, node_data)
 					plugin.get_editor_interface().edit_resource(node_data)
 					),
 				(func():
@@ -250,13 +252,15 @@ static func open_context_menu(screen_position : Vector2, names : Array, values :
 						prop_editor.resource_changed.connect(callbacks[i])
 						prop_editor.resource_changed.connect(plugin.update_overlays.unbind(1))
 						prop_editor.custom_minimum_size = Vector2(192.0, 0.0)
-						prop_editor.get_child(0).pressed.connect(func():
-							prop_editor.get_child(1).pressed.emit()
+						prop_editor.resource_selected.connect(func(resource, inspect):
+							prop_editor.get_child(1, true).pressed.emit()
 
 							# Emit the signal as if "Quick Load" was pressed.
-							# This does not work in practice (tested on 4.3 stable): the opened window immediately closes.
-
-							# prop_editor.get_child(2).id_pressed.emit.call_deferred(1)
+							# This does not work in 4.3 stable: the opened window immediately closes.
+							# However, 4.4's updated Quick Load will show normally.
+							var editor_version := Engine.get_version_info()
+							if editor_version.major > 4 || (editor_version.major == 4 && editor_version.minor >= 4):
+								prop_editor.get_child(2).id_pressed.emit.call_deferred(1)
 						)
 
 					"resource_array":
@@ -302,7 +306,10 @@ static func open_context_menu(screen_position : Vector2, names : Array, values :
 	context_menu.popup_centered()
 	context_menu.size = root_box.get_minimum_size()
 	context_menu.position = screen_position
-	context_menu.visibility_changed.connect(func(): context_menu.queue_free())
+	if is_instance_valid(previous_context_menu):
+		previous_context_menu.queue_free()
+
+	previous_context_menu = context_menu
 	return context_menu
 
 
