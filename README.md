@@ -11,6 +11,7 @@ Build a graph that will be unlocked connection-by-connection.
 - ⚡ You must enable the plugin! `Project -> Settings -> Plugins`
 - Add a `WorldmapView` to your scene.
 - Add some worldmap items. `WorldmapGraph`s offer a branching tree/graph structure where nodes and connections can be added anywhere. `WorldmapPath`s are a non-branching path: a line, an arc, or a Bézier curve.
+- Points can be created through the Inspector (*nodes -> Add Element*), or by clicking the circle around the graph node in the main viewport.
 - If you have multiple worldmap items, connect them by placing an empty point above a non-empty point (*it's empty if data is set to `<empty>`. Point index is shown above it if it's selected*). If in a `WorldmapGraph`, you must right-click it to mark as an end connection.
 - Use `WorldmapView`'s methods!
 
