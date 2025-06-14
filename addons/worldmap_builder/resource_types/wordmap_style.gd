@@ -18,7 +18,7 @@ extends Resource
 ## Repeats the texture. Make sure it's configured to repeat.
 @export var straight_tex_repeat := false
 
-## If a line is drawn between nodes with different styles, the one with higher priority will be used._add_cell_to_selection
+## If a line is drawn between nodes with different styles, the one with higher priority will be used.
 @export var priority := 0
 
 

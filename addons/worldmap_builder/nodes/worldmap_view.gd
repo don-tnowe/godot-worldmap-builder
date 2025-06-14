@@ -123,6 +123,7 @@ var _connections_by_items := {}
 var _connections_by_item_pairs := {}
 var _worldmap_state := {}
 var _worldmap_can_activate := {}
+var _worldmap_style_overrides := {}
 
 var _updating_activatable := false
 
@@ -205,7 +206,15 @@ func _draw():
 
 			x.set_node_visible(j, !unclickable_inactive || cur_item_activatable[j] || cur_item_states[j])
 
-			if cur_item_activatable[j]:
+			var cur_override_arr = _worldmap_style_overrides.get(x_path, null)
+			var cur_override = null
+			if cur_override_arr != null && cur_override_arr.size() > j:
+				cur_override = cur_override_arr[j]
+
+			if cur_override != null:
+				cur_styles[j] = cur_override
+
+			elif cur_item_activatable[j]:
 				cur_styles[j] = style_can_activate
 
 			elif cur_item_states[j] != 0:
@@ -558,7 +567,20 @@ func load_state(state : Dictionary):
 
 	_update_activatable()
 
+## Override style to show on a node instead of [member style_active], [member style_can_activate] or [member style_inactive].
+func set_node_style_override(item : NodePath, node : int, style : WorldmapStyle):
+	var new_arr : Array[WorldmapStyle]
+	if !_worldmap_style_overrides.has(item):
+		new_arr = []
+		_worldmap_style_overrides[item] = new_arr
 
+	else:
+		new_arr = _worldmap_style_overrides[item]
+
+	new_arr.resize(maxi(new_arr.size(), node + 1))
+	new_arr[node] = style
+
+## Called by child [WorldmapViewItem]s when a node is added at runtime.
 func view_item_node_added(node : WorldmapViewItem, index : int):
 	var node_path := get_path_to(node)
 	_worldmap_can_activate[node_path].insert(index, false)
@@ -566,7 +588,7 @@ func view_item_node_added(node : WorldmapViewItem, index : int):
 	recalculate_map()
 	queue_redraw()
 
-
+## Called by child [WorldmapViewItem]s when a node is removed at runtime.
 func view_item_node_removed(node : WorldmapViewItem, index : int):
 	var node_path := get_path_to(node)
 	_worldmap_can_activate[node_path].remove_at(index)
