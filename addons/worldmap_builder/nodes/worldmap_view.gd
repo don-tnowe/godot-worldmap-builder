@@ -2,6 +2,8 @@
 class_name WorldmapView
 extends Control
 
+## Responsible for rendering, input and state storage of its [WorldmapViewItem] children.
+
 class ConnectionPoint extends RefCounted:
 	var position := Vector2.ZERO
 	var id := 0

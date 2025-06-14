@@ -1,6 +1,8 @@
 class_name WorldmapViewItem
 extends Node2D
 
+## Part of a [WorldmapView]. Not useful on its own, consider: [WorldmapGraph], [WorldmapPath].
+
 ## Emitted when a node on this view item receives input.
 signal node_gui_input(event : InputEvent, uid : int, resource : WorldmapNodeData)
 ## Emitted when a node on this view item has the mouse over.

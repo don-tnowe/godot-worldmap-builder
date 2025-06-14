@@ -2,6 +2,10 @@
 class_name WorldmapNodeData
 extends Resource
 
+## A resource type for storing read-only data that a worldmap node represents.
+##
+## Multiple worldmap nodes may use the same data resource, but state, such as unlock state or amount of points allocated, is stored inside the [WorldmapView]. Developers should usually add their own game-specific features and data here, such as effect per level, generated descriptions and variable cost.
+
 ## A node with no texture or description. Unlike assigning [code]null[/code], will still show the empty frame from a [WorldmapStyle].
 static var EMPTY := WorldmapNodeData.new()
 
