@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WorldmapNodeData" load_steps=6 format=3 uid="uid://momqsxlp1gfs"]
 
-[ext_resource type="Script" path="res://example/skill_stats.gd" id="1_ijp2i"]
-[ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_q3vei"]
+[ext_resource type="Script" uid="uid://bpmvikr3ey408" path="res://example/skill_stats.gd" id="1_ijp2i"]
+[ext_resource type="Script" uid="uid://cl2de3nbgv2qg" path="res://addons/worldmap_builder/resource_types/worldmap_node_data.gd" id="1_q3vei"]
 [ext_resource type="Texture2D" uid="uid://cji2hjb30pjt0" path="res://example/skill_icons1.png" id="2_yn26q"]
 
 [sub_resource type="Resource" id="Resource_o1p53"]

@@ -1,18 +1,19 @@
-[gd_scene load_steps=23 format=3 uid="uid://4tmqw8w2u8o5"]
+[gd_scene load_steps=24 format=3 uid="uid://4tmqw8w2u8o5"]
 
-[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
+[ext_resource type="Script" uid="uid://bfw3ldkpbv6r1" path="res://addons/worldmap_builder/nodes/worldmap_view.gd" id="1_fafx5"]
 [ext_resource type="Texture2D" uid="uid://dfwrk73ka6j8x" path="res://example/skilltree_borders.png" id="2_76jt8"]
-[ext_resource type="Script" path="res://addons/worldmap_builder/resource_types/wordmap_style.gd" id="2_oxm7o"]
-[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
+[ext_resource type="Script" uid="uid://df3uck0ooxxqy" path="res://addons/worldmap_builder/resource_types/wordmap_style.gd" id="2_oxm7o"]
+[ext_resource type="Script" uid="uid://dr8ckx0ydbaus" path="res://addons/worldmap_builder/nodes/worldmap_path.gd" id="2_oyim1"]
 [ext_resource type="Resource" uid="uid://bauso3p8ba010" path="res://example/skills/small_hp.tres" id="2_xtlsu"]
 [ext_resource type="Resource" uid="uid://momqsxlp1gfs" path="res://example/skills/small_elemental.tres" id="4_ytcj4"]
 [ext_resource type="Resource" uid="uid://c31230cm8np7i" path="res://example/skills/small_acc.tres" id="5_fevd2"]
 [ext_resource type="Resource" uid="uid://dqwiht23gapri" path="res://example/skills/small_xp.tres" id="5_sdu2a"]
 [ext_resource type="Resource" uid="uid://b50a23pxlslin" path="res://example/skills/small_evasion.tres" id="6_jp1vb"]
-[ext_resource type="Script" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
+[ext_resource type="Script" uid="uid://dgvxfl64wub1n" path="res://addons/worldmap_builder/nodes/worldmap_graph.gd" id="7_miljq"]
 [ext_resource type="Resource" uid="uid://b1t0k6su5o8v" path="res://example/skills/small_mp.tres" id="8_41shr"]
 [ext_resource type="Resource" uid="uid://xy4g21ll2705" path="res://example/skills/small_weapon.tres" id="9_vbyll"]
-[ext_resource type="Script" path="res://example/input_handler.gd" id="13_3q26m"]
+[ext_resource type="Resource" uid="uid://blvno4nfn2sac" path="res://example/skills/small_spell.tres" id="12_jkrui"]
+[ext_resource type="Script" uid="uid://bv73nm5ocjwsq" path="res://example/input_handler.gd" id="13_3q26m"]
 [ext_resource type="Resource" uid="uid://dnpf51y01rqsa" path="res://example/skills/small_ward.tres" id="13_6sgvs"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vql2y"]
@@ -187,13 +188,13 @@ connection_min_length = 64.0
 node_grid_snap = 1
 end_connection_nodes = Array[int]([4, 8, 9, 5])
 node_count = 10
-node_0/data = ExtResource("8_41shr")
+node_0/data = ExtResource("2_xtlsu")
 node_0/position = Vector2(262.132, 344.289)
-node_1/data = ExtResource("8_41shr")
-node_1/position = Vector2(254.64, 285.536)
+node_1/data = ExtResource("12_jkrui")
+node_1/position = Vector2(251, 286)
 node_2/data = ExtResource("8_41shr")
-node_2/position = Vector2(371.725, 359.021)
-node_3/data = ExtResource("8_41shr")
+node_2/position = Vector2(373, 359)
+node_3/data = ExtResource("6_jp1vb")
 node_3/position = Vector2(202.332, 321.317)
 node_4/data = null
 node_4/position = Vector2(247, 216)
@@ -202,7 +203,7 @@ node_5/position = Vector2(306, 251)
 node_6/data = ExtResource("8_41shr")
 node_6/position = Vector2(309.995, 401.607)
 node_7/data = ExtResource("8_41shr")
-node_7/position = Vector2(400.615, 295.807)
+node_7/position = Vector2(400, 295)
 node_8/data = ExtResource("8_41shr")
 node_8/position = Vector2(471.385, 264.547)
 node_9/data = ExtResource("8_41shr")
@@ -335,7 +336,7 @@ mouse_filter = 2
 [node name="Label2" type="Label" parent="InputHandler/Tooltip/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "This skill gives +0.0001% to some useless stat.
-I have this type of skill trees."
+I hate this type of skill trees."
 
 [node name="Anchors" type="MarginContainer" parent="InputHandler"]
 anchors_preset = 15
