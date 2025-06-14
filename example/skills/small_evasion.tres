@@ -23,5 +23,6 @@ desc = "+8 Evasion Rating
 Evasion adds a chance to evade hits"
 size_tier = 0
 cost = 1
+dependency_min_state = 1
 tags = Array[StringName]([&"small", &"evasion", &"defensive"])
 data = Array[Resource]([SubResource("Resource_3e270")])

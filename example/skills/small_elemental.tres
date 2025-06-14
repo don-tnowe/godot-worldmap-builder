@@ -22,5 +22,6 @@ name = "Lesser Elemental Damage"
 desc = "+4% All Elemental Damage"
 size_tier = 0
 cost = 1
+dependency_min_state = 1
 tags = Array[StringName]([&"small", &"elemental", &"damage"])
 data = Array[Resource]([SubResource("Resource_o1p53")])

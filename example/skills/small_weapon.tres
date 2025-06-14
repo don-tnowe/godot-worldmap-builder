@@ -22,5 +22,6 @@ name = "Lesser Weapon Damage"
 desc = "+4% Weapon Damage"
 size_tier = 0
 cost = 1
+dependency_min_state = 1
 tags = Array[StringName]([&"small", &"damage", &"weapon", &"physical"])
 data = Array[Resource]([SubResource("Resource_mqoto")])

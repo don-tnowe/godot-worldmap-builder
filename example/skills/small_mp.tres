@@ -22,5 +22,6 @@ name = "Lesser Magic Energy"
 desc = "+20 Magic Points"
 size_tier = 0
 cost = 1
+dependency_min_state = 1
 tags = Array[StringName]([&"small", &"mp", &"magic"])
 data = Array[Resource]([SubResource("Resource_rsabr")])

@@ -22,5 +22,6 @@ name = "Lesser Life"
 desc = "+20 Health Points"
 size_tier = 0
 cost = 1
+dependency_min_state = 1
 tags = Array[StringName]([&"small", &"hp", &"physical"])
 data = Array[Resource]([SubResource("Resource_80apy")])
