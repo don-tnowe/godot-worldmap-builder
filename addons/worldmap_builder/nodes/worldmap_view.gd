@@ -98,6 +98,11 @@ signal node_mouse_exited(path : NodePath, node_in_path : int, resource : Worldma
 		editor_preview = v
 		queue_redraw()
 
+## If [code]true[/code], inactive ([i]impossible to allocate immediately[/i]) graph nodes do not show their icons. This still displays the frames and lines for [member style_inactive], which must be empty if they must be fully hidden.
+@export var hide_inactive := false
+## If [code]true[/code], inactive ([i]impossible to allocate immediately[/i]) graph nodes will not emit [signal node_gui_input] or block Control input.
+@export var unclickable_inactive := false
+
 @export_group("Styles")
 ## Style for nodes that are active.
 @export var style_active : WorldmapStyle
@@ -190,7 +195,13 @@ func _draw():
 		cur_styles.resize(x_node_count)
 		for j in x_node_count:
 			cur_positions[j] = x.get_node_position(j)
-			cur_datas[j] = x.get_node_data(j)
+			if !hide_inactive || cur_item_activatable[j] || cur_item_states[j]:
+				cur_datas[j] = x.get_node_data(j)
+
+			else:
+				cur_datas[j] = WorldmapNodeData.EMPTY
+
+			x.set_node_visible(j, !unclickable_inactive || cur_item_activatable[j] || cur_item_states[j])
 
 			if cur_item_activatable[j]:
 				cur_styles[j] = style_can_activate

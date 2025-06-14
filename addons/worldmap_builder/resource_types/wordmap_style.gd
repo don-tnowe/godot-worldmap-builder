@@ -23,17 +23,23 @@ extends Resource
 
 
 func draw_node(canvas : CanvasItem, data : WorldmapNodeData, pos : Vector2):
-	if data == null || data.texture == null:
+	if data == null:
 		return
 
-	var used_border := icon_borders[mini(data.size_tier, icon_borders.size() - 1)]
-	canvas.draw_texture(data.texture, pos - data.texture.get_size() * 0.5)
-	canvas.draw_texture(used_border, pos - used_border.get_size() * 0.5)
+	if data.texture != null:
+		canvas.draw_texture(data.texture, pos - data.texture.get_size() * 0.5)
+
+	if icon_borders.size() != 0:
+		var used_border := icon_borders[mini(data.size_tier, icon_borders.size() - 1)]
+		canvas.draw_texture(used_border, pos - used_border.get_size() * 0.5)
 
 
 func draw_connection(canvas : CanvasItem, other : WorldmapStyle, pos1 : Vector2, pos2 : Vector2):
 	if other.priority > priority:
 		other.draw_connection(canvas, other, pos2, pos1)
+		return
+
+	if straight_tex == null || straight_tex_region.size == Vector2.ZERO:
 		return
 
 	if pos1.x > pos2.x:

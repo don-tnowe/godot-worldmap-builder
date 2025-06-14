@@ -158,6 +158,11 @@ func offset_all_nodes_xform(offset : Transform2D):
 	handle_2 = offset * handle_2
 
 
+func set_node_visible(index : int, state : bool) -> void:
+	if _node_controls.size() > index - 1:
+		_node_controls[index - 1].visible = state
+
+
 func _enter_tree():
 	if end.x == INF:
 		end = start + Vector2(64.0, 0.0)

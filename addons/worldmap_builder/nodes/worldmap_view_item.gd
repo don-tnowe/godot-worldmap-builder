@@ -75,6 +75,10 @@ func get_clickable_rect() -> Rect2:
 
 	return result
 
+## Must change visibility of the specified node [Control], to make it clickable/unclickable.
+func set_node_visible(index : int, state : bool) -> void:
+	assert(false, "Method WorldmapViewItem::set_node_visible() not implemented!")
+
 
 func _set_grid_snap(v : int):
 	if !is_inside_tree(): return

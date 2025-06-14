@@ -188,6 +188,11 @@ func offset_all_nodes_xform(offset : Transform2D):
 	queue_redraw()
 
 
+func set_node_visible(index : int, state : bool) -> void:
+	if _node_controls.size() > index:
+		_node_controls[index].visible = state
+
+
 func _enter_tree():
 	if transform != Transform2D.IDENTITY:
 		offset_all_nodes_xform(transform)

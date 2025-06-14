@@ -2,6 +2,9 @@
 class_name WorldmapNodeData
 extends Resource
 
+## A node with no texture or description. Unlike assigning [code]null[/code], will still show the empty frame from a [WorldmapStyle].
+static var EMPTY := WorldmapNodeData.new()
+
 ## Node ID. Used by developer.
 @export var id := &""
 ## Node texture.
