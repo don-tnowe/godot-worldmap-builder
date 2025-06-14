@@ -27,11 +27,11 @@ func draw_node(canvas : CanvasItem, data : WorldmapNodeData, pos : Vector2):
 		return
 
 	if data.texture != null:
-		canvas.draw_texture(data.texture, pos - data.texture.get_size() * 0.5)
+		canvas.draw_texture(data.texture, pos - data.texture.get_size() * 0.5, icon_modulate)
 
 	if icon_borders.size() != 0:
 		var used_border := icon_borders[mini(data.size_tier, icon_borders.size() - 1)]
-		canvas.draw_texture(used_border, pos - used_border.get_size() * 0.5)
+		canvas.draw_texture(used_border, pos - used_border.get_size() * 0.5, icon_border_modulate)
 
 
 func draw_connection(canvas : CanvasItem, other : WorldmapStyle, pos1 : Vector2, pos2 : Vector2):

@@ -61,7 +61,7 @@ region = Rect2(0, 32, 32, 32)
 [sub_resource type="Resource" id="Resource_2hquj"]
 resource_name = "Inactive"
 script = ExtResource("2_oxm7o")
-icon_modulate = Color(1, 1, 1, 1)
+icon_modulate = Color(0.275248, 0.324215, 0.424479, 1)
 icon_border_modulate = Color(1, 1, 1, 1)
 connection_modulate = Color(1, 1, 1, 1)
 icon_borders = Array[Texture2D]([SubResource("AtlasTexture_wm6gh")])
