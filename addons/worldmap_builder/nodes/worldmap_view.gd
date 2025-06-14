@@ -19,6 +19,9 @@ class ConnectionPoint extends RefCounted:
 				return
 
 			filled_node_item = v
+	var filled_node_data : WorldmapNodeData:
+		get:
+			return items[filled_node_item].get_node_data(indices[filled_node_item])
 
 
 	func add(item : WorldmapViewItem, path : NodePath, node_index : int):
@@ -626,12 +629,12 @@ func _update_activatable_local(item_path : NodePath):
 			# it can if AT LEAST one connection activates it.
 			continue
 
-		if nodes_state[x.y] > 0 && nodes_state[x.x] <= 0:
+		if nodes_state[x.x] <= 0 && (item.get_node_data(x.x) == null || nodes_state[x.y] >= item.get_node_data(x.x).dependency_min_state):
 			var cost : float = item.get_connection_cost(x.y, x.x)
 			if max_unlock_cost >= cost:
 				nodes_activatable[x.x] = true
 
-		if nodes_state[x.x] > 0 && nodes_state[x.y] <= 0:
+		if nodes_state[x.y] <= 0 && (item.get_node_data(x.y) == null || nodes_state[x.x] >= item.get_node_data(x.y).dependency_min_state):
 			var cost : float = item.get_connection_cost(x.x, x.y)
 			if max_unlock_cost >= cost:
 				nodes_activatable[x.y] = true
@@ -644,7 +647,8 @@ func _update_activatable_interitem(connection : ConnectionPoint):
 		_worldmap_can_activate[filled_item_path][filled_index] = false
 		return
 
-	var neighbors := get_connections_of_point(filled_index, filled_item_path, 1, false, true)
+	var filled_data := connection.filled_node_data
+	var neighbors := get_connections_of_point(filled_index, filled_item_path, filled_data.dependency_min_state if filled_data != null else 1, false, true)
 	var activatable := false
 	for x in neighbors.costs:
 		if max_unlock_cost >= x:

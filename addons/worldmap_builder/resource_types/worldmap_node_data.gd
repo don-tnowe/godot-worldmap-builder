@@ -24,6 +24,8 @@ static var EMPTY := WorldmapNodeData.new()
 @export var size_tier := 0
 ## The cost of moving onto this node, if possible. Used for pathfinding.
 @export var cost := 1
+## Other nodes that connect to this node must have at least this much state to make this node available. Anything less than 1 makes it always available.
+@export var dependency_min_state := 1
 ## Node tags. Used by developer.
 @export var tags : Array[StringName]
 ## Node's extra data. Used by developer.
